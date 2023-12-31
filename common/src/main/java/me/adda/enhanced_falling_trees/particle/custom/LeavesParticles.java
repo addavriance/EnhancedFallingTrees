@@ -34,6 +34,8 @@ public class LeavesParticles extends SimpleAnimatedParticle {
         this.maxRotateTime = (3 + random.nextInt(4 + 1)) * 20;
         this.maxRotateSpeed = (float) ((random.nextBoolean() ? -1 : 1) * (0.1f + 2.4f * random.nextFloat()) * (random.nextFloat() * (2 * Math.PI)) / 20f);
 
+        this.lifetime = 40;
+
     }
 
     @Override
