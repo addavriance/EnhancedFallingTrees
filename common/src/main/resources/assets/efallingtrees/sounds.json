@@ -1,0 +1,32 @@
+{
+	"tree_fall": {
+		"sounds": [
+			"efallingtrees:tree_fall"
+		]
+	},
+	"tree_impact": {
+		"sounds": [
+			"efallingtrees:tree_impact"
+		]
+	},
+	"cactus_fall": {
+		"sounds": [
+			"efallingtrees:cactus_fall"
+		]
+	},
+	"cactus_impact": {
+		"sounds": [
+			"efallingtrees:cactus_impact"
+		]
+	},
+	"bamboo_fall": {
+		"sounds": [
+			"efallingtrees:bamboo_fall"
+		]
+	},
+	"bamboo_impact": {
+		"sounds": [
+			"efallingtrees:bamboo_impact"
+		]
+	}
+}

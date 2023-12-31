@@ -1,0 +1,33 @@
+package me.adda.enhanced_falling_trees.config;
+
+import me.adda.enhanced_falling_trees.FallingTrees;
+import me.adda.enhanced_falling_trees.config.common.FeaturesConfig;
+import me.adda.enhanced_falling_trees.config.common.FilterConfig;
+import me.adda.enhanced_falling_trees.config.common.LimitationsConfig;
+import me.shedaniel.autoconfig.ConfigData;
+import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.autoconfig.annotation.ConfigEntry;
+
+@Config(name = FallingTrees.MOD_ID + "_common")
+public class CommonConfig implements ConfigData {
+	public boolean isCrouchMiningAllowed = true;
+	public boolean multiplyToolDamage = true;
+	public boolean multiplyFoodExhaustion = true;
+
+	public float treeLifetimeLength = 4;
+	public float cactusLifetimeLength = 2.5f;
+	public float bambooLifetimeLength = 2;
+	public float chorusLifetimeLength = 4;
+
+	@ConfigEntry.Category("filter")
+	@ConfigEntry.Gui.TransitiveObject
+	public FilterConfig filter = new FilterConfig();
+
+	@ConfigEntry.Category("limitations")
+	@ConfigEntry.Gui.TransitiveObject
+	public LimitationsConfig limitations = new LimitationsConfig();
+
+	@ConfigEntry.Category("features")
+	@ConfigEntry.Gui.TransitiveObject
+	public FeaturesConfig features = new FeaturesConfig();
+}
