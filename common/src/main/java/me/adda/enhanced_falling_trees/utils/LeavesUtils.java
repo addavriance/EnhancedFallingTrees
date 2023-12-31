@@ -20,13 +20,11 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Set;
+import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class LeavesUtils {
@@ -51,11 +49,13 @@ public class LeavesUtils {
 
         BakedModel model = client.getBlockRenderer().getBlockModel(leavesState);
 
+        List<BakedQuad> quads = model.getQuads(leavesState, null, random);
+
+        boolean shouldColor = quads.isEmpty() || quads.stream().anyMatch(BakedQuad::isTinted);
+
         ResourceLocation texture = spriteToTexture(model.getParticleIcon());
 
-//        double[] leaves_rgb = mergeColorIncludeBiome(world.getBiome(leavesPos).value(), calculateLeafColor(texture, true, leafColor, client));
-
-        double[] leaves_rgb = calculateLeafColor(texture, leafColor, client);
+        double[] leaves_rgb = calculateLeafColor(texture, shouldColor, leafColor, client);
 
         float red = (float) leaves_rgb[0];
         float green = (float) leaves_rgb[1];
@@ -66,13 +66,15 @@ public class LeavesUtils {
 
     }
 
-    private static double[] calculateLeafColor(ResourceLocation texture, int blockColor, Minecraft client) {
-       Resource res = client.getResourceManager().getResource(texture).orElse(null);
-       double[] textureColor = {0, 0, 0};
+    private static double[] calculateLeafColor(ResourceLocation texture, boolean shouldColor, int blockColor, Minecraft client) {
+        Resource res = client.getResourceManager().getResource(texture).orElse(null);
 
         if (res != null) {
-            String resourcePack = res.source().getNamespaces(PackType.CLIENT_RESOURCES).toString();
+
+            String resourcePack = res.sourcePackId();
             TextureCache.Data cache = TextureCache.INST.get(texture);
+
+            double[] textureColor;
 
             if (cache != null && resourcePack.equals(cache.resourcePack)) {
                 textureColor = cache.getColor();
@@ -84,15 +86,17 @@ public class LeavesUtils {
                     throw new RuntimeException(e);
                 }
             }
-        } else {
 
-            textureColor[0] *= (blockColor >> 16 & 255) / 255.0;
-            textureColor[1] *= (blockColor >> 8 & 255) / 255.0;
-            textureColor[2] *= (blockColor & 255) / 255.0;
+            if (shouldColor && blockColor != -1) {
+                textureColor[0] *= (blockColor >> 16 & 255) / 255.0;
+                textureColor[1] *= (blockColor >> 8 & 255) / 255.0;
+                textureColor[2] *= (blockColor & 255) / 255.0;
+            }
 
+            return textureColor;
         }
 
-        return textureColor;
+        return new double[] {1, 1, 1};
     }
 
     public static double[] averageColor(BufferedImage image) {
@@ -115,9 +119,9 @@ public class LeavesUtils {
         }
 
         return new double[] {
-                ((r / n) / 255.0),
-                ((g / n) / 255.0),
-                ((b / n) / 255.0)
+                (r / n) / 255.0,
+                (g / n) / 255.0,
+                (b / n) / 255.0
         };
     }
 
