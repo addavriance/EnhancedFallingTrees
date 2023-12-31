@@ -125,17 +125,6 @@ public class LeavesUtils {
         };
     }
 
-//    public static double[] mergeColorIncludeBiome(Biome biome, double[] leafColor) {
-//        // Wrong
-//        int biomeColor = biome.getFoliageColor();
-//
-//        double red = ((float) (biomeColor >> 16 & 255) / 255) * leafColor[0];
-//        double green = ((float) (biomeColor >> 8 & 255) / 255) * leafColor[1];
-//        double blue = ((float) (biomeColor & 255) / 255) * leafColor[2];
-//
-//        return new double[]{red, green, blue};
-//    }
-
     public static ResourceLocation spriteToTexture(TextureAtlasSprite sprite) {
         String texture = sprite.contents().name().getPath();
         return new ResourceLocation(sprite.contents().name().getNamespace(), "textures/" + texture + ".png");
