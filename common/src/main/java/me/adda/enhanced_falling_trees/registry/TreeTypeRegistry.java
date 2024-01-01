@@ -7,7 +7,6 @@ import me.adda.enhanced_falling_trees.trees.BambooTree;
 import me.adda.enhanced_falling_trees.trees.CactusTree;
 import me.adda.enhanced_falling_trees.trees.ChorusTree;
 import me.adda.enhanced_falling_trees.trees.DefaultTree;
-import me.adda.enhanced_falling_trees.trees.*;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Supplier;

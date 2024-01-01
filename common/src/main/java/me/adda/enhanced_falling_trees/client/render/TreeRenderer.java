@@ -2,8 +2,8 @@ package me.adda.enhanced_falling_trees.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.api.TreeType;
+import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.utils.GroundUtils;
 import me.adda.enhanced_falling_trees.utils.RenderUtils;
 import net.fabricmc.api.EnvType;
@@ -15,15 +15,14 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.Map;
 import java.util.Arrays;
+import java.util.Map;
 
 @Environment(EnvType.CLIENT)
 public class TreeRenderer extends EntityRenderer<TreeEntity> {

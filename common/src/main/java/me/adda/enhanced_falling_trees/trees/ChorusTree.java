@@ -1,14 +1,9 @@
 package me.adda.enhanced_falling_trees.trees;
 
-import me.adda.enhanced_falling_trees.config.CommonConfig;
-import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.api.TreeType;
-import me.adda.enhanced_falling_trees.network.ConfigPacket;
+import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChorusPlantBlock;

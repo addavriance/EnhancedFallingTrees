@@ -1,8 +1,8 @@
 package me.adda.enhanced_falling_trees.config;
 
+import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.config.client.AnimationConfig;
 import me.adda.enhanced_falling_trees.config.client.SoundSettingsConfig;
-import me.adda.enhanced_falling_trees.FallingTrees;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;

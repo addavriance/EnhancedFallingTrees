@@ -1,9 +1,8 @@
 package me.adda.enhanced_falling_trees.registry;
 
-import me.adda.enhanced_falling_trees.FallingTrees;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
-
+import me.adda.enhanced_falling_trees.FallingTrees;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;

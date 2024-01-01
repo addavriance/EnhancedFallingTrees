@@ -1,12 +1,9 @@
 package me.adda.enhanced_falling_trees.api;
 
-import me.adda.enhanced_falling_trees.config.CommonConfig;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.config.common.LimitationsConfig;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.network.ConfigPacket;
-import me.adda.enhanced_falling_trees.trees.DefaultTree;
-import me.adda.enhanced_falling_trees.utils.LeavesUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -19,7 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 public interface TreeType {

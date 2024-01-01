@@ -1,19 +1,13 @@
 package me.adda.enhanced_falling_trees.trees;
 
 import dev.architectury.platform.Platform;
-import me.adda.enhanced_falling_trees.config.CommonConfig;
-import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
-import me.adda.enhanced_falling_trees.config.client.AnimationConfig;
-import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.api.TreeType;
-import me.adda.enhanced_falling_trees.network.ConfigPacket;
+import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
+import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.registry.SoundRegistry;
 import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;

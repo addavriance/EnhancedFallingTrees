@@ -4,10 +4,9 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.mixin.MixinDefaultParticleType;
-import net.minecraft.core.particles.*;
-import net.minecraft.core.registries.Registries;
-
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Supplier;

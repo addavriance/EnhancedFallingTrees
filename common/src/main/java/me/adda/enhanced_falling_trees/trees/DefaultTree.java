@@ -1,9 +1,9 @@
 package me.adda.enhanced_falling_trees.trees;
 
 import dev.architectury.platform.Platform;
+import me.adda.enhanced_falling_trees.api.TreeType;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
-import me.adda.enhanced_falling_trees.api.TreeType;
 import me.adda.enhanced_falling_trees.registry.SoundRegistry;
 import me.adda.enhanced_falling_trees.utils.GroundUtils;
 import me.adda.enhanced_falling_trees.utils.LeavesUtils;
