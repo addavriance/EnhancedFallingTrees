@@ -20,9 +20,9 @@ public class AnimationConfig {
 	}
 
 	public static class BambooProperties {
-		public float fallAnimLength = 2.5f;
-		public float bounceAngleHeight = 10;
-		public float bounceAnimLength = 1;
+		public float fallAnimLength = 1;
+		public float bounceAngleHeight = 4;
+		public float bounceAnimLength = 0.3f;
 	}
 
 	public static class CactusProperties {
