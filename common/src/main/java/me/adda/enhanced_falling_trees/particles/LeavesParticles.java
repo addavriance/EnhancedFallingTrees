@@ -1,4 +1,4 @@
-package me.adda.enhanced_falling_trees.particle.custom;
+package me.adda.enhanced_falling_trees.particles;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;

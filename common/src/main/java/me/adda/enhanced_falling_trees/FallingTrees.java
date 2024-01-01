@@ -3,7 +3,7 @@ package me.adda.enhanced_falling_trees;
 import dev.architectury.registry.client.particle.ParticleProviderRegistry;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.event.EventHandler;
-import me.adda.enhanced_falling_trees.particle.custom.LeavesParticles;
+import me.adda.enhanced_falling_trees.particles.LeavesParticles;
 import me.adda.enhanced_falling_trees.utils.BlockMapEntityData;
 import me.adda.enhanced_falling_trees.network.PacketHandler;
 import me.adda.enhanced_falling_trees.registry.EntityRegistry;
