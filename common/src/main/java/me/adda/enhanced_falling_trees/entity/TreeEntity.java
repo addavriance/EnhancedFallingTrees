@@ -3,18 +3,11 @@ package me.adda.enhanced_falling_trees.entity;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.api.TreeRegistry;
 import me.adda.enhanced_falling_trees.api.TreeType;
-import me.adda.enhanced_falling_trees.particle.custom.LeavesParticles;
 import me.adda.enhanced_falling_trees.registry.EntityRegistry;
-import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
 import me.adda.enhanced_falling_trees.registry.TreeTypeRegistry;
 import me.adda.enhanced_falling_trees.utils.BlockMapEntityData;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -37,11 +30,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 public class TreeEntity extends Entity {
 	public static final EntityDataAccessor<Map<BlockPos, BlockState>> BLOCKS = SynchedEntityData.defineId(TreeEntity.class, BlockMapEntityData.BLOCK_MAP);
-	public static final EntityDataAccessor<Integer> HEIGHT = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.INT);
 	public static final EntityDataAccessor<BlockPos> ORIGIN_POS = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.BLOCK_POS);
 	public static final EntityDataAccessor<ItemStack> USED_TOOL = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.ITEM_STACK);
 	public static final EntityDataAccessor<Direction> FALL_DIRECTION = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.DIRECTION);
@@ -76,17 +67,14 @@ public class TreeEntity extends Entity {
 		this.owner = owner;
 		this.treeType = treeType;
 
-		int height = 0;
-
 		Map<BlockPos, BlockState> blockPosMap = new HashMap<>();
+
 		for (BlockPos pos : blockPosList) {
-			if (pos.getY() > height)
-				height = pos.getY() - originBlock.getY();
 			blockPosMap.put(pos.immutable().subtract(originBlock), level().getBlockState(pos));
 		}
+
 		this.getEntityData().set(ORIGIN_POS, originBlock);
 		this.getEntityData().set(BLOCKS, blockPosMap);
-		this.getEntityData().set(HEIGHT, height);
 		this.getEntityData().set(USED_TOOL, itemStack);
 		ResourceLocation treeTypeLocation = TreeRegistry.getTreeTypeLocation(treeType);
 		if (treeTypeLocation != null)
@@ -99,7 +87,6 @@ public class TreeEntity extends Entity {
 	@Override
 	protected void defineSynchedData() {
 		this.getEntityData().define(BLOCKS, new HashMap<>());
-		this.getEntityData().define(HEIGHT, 0);
 		this.getEntityData().define(ORIGIN_POS, new BlockPos(0, 0, 0));
 		this.getEntityData().define(USED_TOOL, ItemStack.EMPTY);
 		this.getEntityData().define(FALL_DIRECTION, Direction.NORTH);
@@ -178,11 +165,11 @@ public class TreeEntity extends Entity {
 		Map<BlockPos, BlockState> blocks = this.getBlocks();
 
 		return (int) blocks.entrySet().stream()
-				.filter(entry -> {
-					BlockPos pos = entry.getKey();
-					BlockState state = entry.getValue().getBlock().defaultBlockState();
-					return pos.getX() == 0 && pos.getZ() == 0 && this.getTreeType().baseBlockCheck(state);
-				})
-				.count();
+			.filter(entry -> {
+				BlockPos pos = entry.getKey();
+				BlockState state = entry.getValue().getBlock().defaultBlockState();
+				return pos.getX() == 0 && pos.getZ() == 0 && this.getTreeType().baseBlockCheck(state);
+			})
+			.count();
 	}
 }
