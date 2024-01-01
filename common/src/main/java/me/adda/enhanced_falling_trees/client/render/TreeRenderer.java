@@ -56,12 +56,14 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 
 		float fallAngle = hasBlockAtRoot ? 15 : calculateFallAngle(groundIndexes);
 
+		entity.setAngle(lerp(entity.getAngle(), fallAngle, 0.05f));
+
 		float time = (float) (entity.getLifetime(partialTick) * (Math.PI / 2) / fallAnimLength);
 
-		float fallAnim = bumpCos(time) * fallAngle;
+		float fallAnim = bumpCos(time) * entity.getAngle();;
 		float bounceAnim = bumpSin((float) ((time - Math.PI / 2) / (bounceAnimLength / (fallAnimLength * 2)))) * bounceHeight;
 
-		float animation = (fallAnim + bounceAnim) - fallAngle;
+		float animation = (fallAnim + bounceAnim) - entity.getAngle();;
 
 		Direction direction = entity.getDirection().getOpposite();
 		int distance = getDistance(treeType, blocks, 0, direction.getOpposite());
@@ -151,6 +153,11 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		}
 
 		return angle;
+	}
+
+	private float lerp(float a, float b, float f)
+	{
+		return (float) ((a * (1.0 - f)) + (b * f));
 	}
 
 }
