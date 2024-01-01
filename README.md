@@ -20,7 +20,12 @@ Additionally, enjoy enhanced visual and auditory features with particle effects 
 > ![preview](gifs%2Fpreview.gif)
 
 >Correct response to terrain changes
+> 
 > ![smooth.gif](gifs%2Fsmooth.gif)
+
+>Cactus fall
+> 
+> ![cactus_preview.gif](gifs%2Fcactus_preview.gif)
 
 ## Features
 - **Realistic Tree Falling:** (also bamboo and cactus are supported) Trees no longer simply disappear; they fall over realistically when cut.
@@ -31,7 +36,7 @@ Additionally, enjoy enhanced visual and auditory features with particle effects 
 
 ## Compatibility
 ### Versions 
-- Compatible with Minecraft Fabric versions 1.20 to 1.20.4.
+- Compatible with Minecraft Fabric/Forge versions 1.20 to 1.20.4.
 ### Mods
 - Compatible with other mods that add trees natively.
 
