@@ -9,7 +9,6 @@
   "contact": {
 		"issues": "https://github.com/addavriance/EnhancedFallingTrees/issues",
 		"sources": "https://github.com/addavriance/EnhancedFallingTrees",
-		"homepage": ""
 	},
 
   "license": "MIT",
@@ -40,9 +39,6 @@
 	},
 	"custom": {
 		"modmenu": {
-			"links": {
-				"modmenu.discord": ""
-			},
 			"update_checker": true
 		}
 	}
