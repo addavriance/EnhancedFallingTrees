@@ -28,10 +28,6 @@ public class FallingTrees {
 		PacketHandler.register();
 		EventHandler.register();
 
-		ParticleRegistry.PARTICLE_TYPES.register();
-
-		ParticleProviderRegistry.register(ParticleRegistry.LEAVES.get(), LeavesParticles.Factory::new);
-
 		EntityDataSerializers.registerSerializer(BlockMapEntityData.BLOCK_MAP);
 	}
 

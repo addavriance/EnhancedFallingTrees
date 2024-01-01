@@ -1,9 +1,18 @@
 package me.adda.enhanced_falling_trees.forge;
 
+import dev.architectury.registry.client.particle.ParticleProviderRegistry;
 import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.config.screen.ConfigScreen;
+import me.adda.enhanced_falling_trees.particles.LeavesParticles;
+import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -15,5 +24,10 @@ public class FallingTreesClientForge {
 	public static void clientInit(FMLClientSetupEvent event) {
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () ->
 				new ConfigScreenHandler.ConfigScreenFactory((minecraft, screen) -> new ConfigScreen(screen)));
+	}
+
+	@SubscribeEvent
+	public static void onParticleFactoryRegistration(RegisterParticleProvidersEvent event) {
+		ParticleProviderRegistry.register(ParticleRegistry.LEAVES.get(), LeavesParticles.Factory::new);
 	}
 }

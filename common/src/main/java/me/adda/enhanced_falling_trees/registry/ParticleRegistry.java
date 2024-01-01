@@ -19,7 +19,11 @@ public class ParticleRegistry {
 
     public static final RegistrySupplier<SimpleParticleType> LEAVES = register("leaves", () -> MixinDefaultParticleType.init(false));
 
-    static <T extends SimpleParticleType> RegistrySupplier<T> register(String name, Supplier<T> type) {
+    public static void bootstrap() {
+        PARTICLE_TYPES.register();
+    }
+
+    public static <T extends SimpleParticleType> RegistrySupplier<T> register(String name, Supplier<T> type) {
         return PARTICLE_TYPES.register(new ResourceLocation(FallingTrees.MOD_ID, name), type);
     }
 
