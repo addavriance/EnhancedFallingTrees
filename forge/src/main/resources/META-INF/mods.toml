@@ -2,7 +2,7 @@ modLoader="javafml"
 loaderVersion="[46,)"
 license="MIT"
 showAsResourcePack=false
-issueTrackerURL=""
+issueTrackerURL="https://github.com/addavriance/EnhancedFallingTrees/issues"
 
 [[mods]]
 	modId="efallingtrees"
