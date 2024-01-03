@@ -72,14 +72,14 @@
 	"text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.minTreeHeight": "Min bamboo height",
 	"text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.onlyRequiredTool": "Only fall when required tool is used",
 
-	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements": "Chorus Fall Requirements",
-	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.maxAmountType": "Max Amount type",
+	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements": "Chorus fall requirements",
+	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.maxAmountType": "Max amount type",
 	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.maxAmount": "Max amount",
 	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.minTreeHeight": "Min chorus height",
 	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.onlyRequiredTool": "Only fall when required tool is used",
 
-	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements": "Cactus Fall Requirements",
-	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.maxAmountType": "Max Amount type",
+	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements": "Cactus fall requirements",
+	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.maxAmountType": "Max amount type",
 	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.maxAmount": "Max amount",
 	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.minTreeHeight": "Min cactus height",
 	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.onlyRequiredTool": "Only fall when required tool is used",
