@@ -27,8 +27,6 @@ import java.util.Map;
 @Environment(EnvType.CLIENT)
 public class TreeRenderer extends EntityRenderer<TreeEntity> {
 
-	GroundUtils groundUtil = new GroundUtils(null, null);
-
 	public TreeRenderer(EntityRendererProvider.Context context) {
 		super(context);
 	}
@@ -51,9 +49,9 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 
 		boolean hasBlockAtRoot = entity.getBlockStateOn().isAir() || treeLevel.getBlockState(entity.getOnPos().above().offset(entity.getDirection().getNormal())).isSolid();
 
-		Integer[] groundIndexes = groundUtil.getGroundInfo(entity).indexes;
+		Integer[] groundIndexes = GroundUtils.getGroundIndexes(entity);
 
-		float fallAngle = hasBlockAtRoot ? 15 : calculateFallAngle(groundIndexes);
+		float fallAngle = hasBlockAtRoot ? 15 : GroundUtils.calculateFallAngle(groundIndexes);
 
 		entity.setAngle(lerp(entity.getAngle(), fallAngle, 0.05f));
 
@@ -120,42 +118,7 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		return (float) Math.max(0, Math.sin(Math.clamp(-Math.PI, Math.PI, time)));
 	}
 
-	private float calculateFallAngle(Integer[] groundIndexes) {
-		int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE, max_index;
-		float angle;
-
-		for (Integer index : groundIndexes) {
-			if (index < min) min = index;
-			if (index > max) max = index;
-		}
-
-		max_index = Arrays.asList(groundIndexes).indexOf(max);
-
-		angle = (float) Math.toDegrees(java.lang.Math.atan((double) (max_index+1) / max));
-
-		if (max <= 0) {
-
-			groundIndexes = groundUtil.translateGroundIndexes(groundIndexes);
-
-			for (Integer index : groundIndexes) {
-				if (index > max) max = index;
-			}
-
-			max_index = Arrays.asList(groundIndexes).indexOf(max);
-
-			angle = 90 + (float) Math.toDegrees(java.lang.Math.atan((double) (max_index + 1) / max));
-
-			boolean allEqual = Arrays.stream(groundIndexes).distinct().count() <= 1;
-
-			if (groundIndexes[0] > 1 || (allEqual && groundIndexes[0] != 0)) angle = 90;
-
-		}
-
-		return angle;
-	}
-
-	private float lerp(float a, float b, float f)
-	{
+	private float lerp(float a, float b, float f) {
 		return (float) ((a * (1.0 - f)) + (b * f));
 	}
 

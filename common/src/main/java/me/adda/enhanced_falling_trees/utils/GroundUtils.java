@@ -10,20 +10,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class GroundUtils {
-    public final Integer[] indexes;
-    public final List<BlockPos> blockData;
 
-    public GroundUtils(Integer[] indexes, List<BlockPos> blockData) {
-        this.indexes = indexes;
-        this.blockData = blockData;
-    }
-
-    public GroundUtils getGroundInfo(TreeEntity entity) {
+    public static Integer[] getGroundIndexes(TreeEntity entity) {
         int treeHeight = entity.getTreeHeight();
         int offset = 0;
 
         Integer[] indexes = new Integer[treeHeight];
-        List<BlockPos> blockData = new ArrayList<>();
 
         for (int i = 0; i < treeHeight; i++) {
             BlockPos blockPos = entity.getOnPos().offset(entity.getDirection().getNormal()).relative(entity.getDirection(), offset + i);
@@ -48,28 +40,35 @@ public class GroundUtils {
                     }
                 }
 
-            blockData.add(blockPos.offset(0, groundIndex, 0));
             indexes[i] = groundIndex;
         }
-
-        return new GroundUtils(indexes, blockData);
+        return indexes;
     }
 
-    public Integer[] translateGroundIndexes(Integer[] groundIndexes) {
+//    public static BlockPos[] getGroundBlocksPoses(TreeEntity entity, Integer[] indexes) {
+//        int treeHeight = entity.getTreeHeight();
+//        BlockPos[] blocksPoses = new BlockPos[treeHeight];
+//
+//        for (int i = 0; i < treeHeight; i++) {
+//            BlockPos blockPos = entity.getOnPos().offset(entity.getDirection().getNormal()).relative(entity.getDirection(), i);
+//
+//            blocksPoses[i] = (blockPos.offset(0, indexes[i], 0));
+//        }
+//
+//        return blocksPoses;
+//    }
 
+    public static Integer[] translateGroundIndexes(Integer[] groundIndexes) {
         int length = groundIndexes.length;
         Integer[] translatedArray = new Integer[length];
-
         Arrays.fill(translatedArray, 0);
 
         for (int i = 0; i < length; i++) {
             int n = length + groundIndexes[i];
-
             replaceFromEnd(translatedArray, n, i + 1);
         }
 
         return translatedArray;
-
     }
 
     public void replaceFromEnd(Integer[] array, int n, int value) {
