@@ -10,6 +10,7 @@ import me.adda.enhanced_falling_trees.utils.LeavesUtils;
 import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.AxeItem;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -57,7 +59,9 @@ public class DefaultTree implements TreeType {
 				}
 			}
 
-			if (entity.tickCount >= entity.getMaxLifeTimeTick()) {
+			if (entity.tickCount == entity.getMaxLifeTimeTick() && !entity.getLeavesDropped()) {
+				entity.setLeavesDropped();
+
 				BlockState leavesState = entity.getBlocks().values().stream()
 						.filter(this::extraRequiredBlockCheck)
 						.findFirst()
@@ -68,13 +72,11 @@ public class DefaultTree implements TreeType {
 						.map(Map.Entry::getKey)
 						.findFirst().orElse(null);
 
-				GroundUtils groundUtil = new GroundUtils(null, null);
+				Vec3[] lineBlocks = GroundUtils.getFallBlockLine(entity);
 
-				List<BlockPos> groundBlocks = groundUtil.getGroundInfo(entity).blockData;
-
-				for (BlockPos groundBlock : groundBlocks) {
-					for (int i = 0; i<25; i++)
-						LeavesUtils.trySpawnLeafParticle(entity.level(), groundBlock.above(2), leavesState, leavesPos, entity.level().getRandom());
+				for (Vec3 lineBlock : lineBlocks) {
+					for (int i = 0; i < 25; i++)
+						LeavesUtils.trySpawnLeafParticle(entity.level(), lineBlock, leavesState, leavesPos, entity.level().getRandom());
 				}
 			}
 		}

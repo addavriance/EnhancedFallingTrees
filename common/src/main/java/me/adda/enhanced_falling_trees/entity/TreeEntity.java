@@ -35,6 +35,7 @@ public class TreeEntity extends Entity {
 	public static final EntityDataAccessor<Map<BlockPos, BlockState>> BLOCKS = SynchedEntityData.defineId(TreeEntity.class, BlockMapEntityData.BLOCK_MAP);
 	public static final EntityDataAccessor<BlockPos> ORIGIN_POS = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.BLOCK_POS);
 	public static final EntityDataAccessor<Float> ANGLE = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.FLOAT);
+	public static final EntityDataAccessor<Boolean> LEAVES_DROPPED = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.BOOLEAN);
 	public static final EntityDataAccessor<ItemStack> USED_TOOL = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.ITEM_STACK);
 	public static final EntityDataAccessor<Direction> FALL_DIRECTION = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.DIRECTION);
 	public static final EntityDataAccessor<String> TREE_TYPE_LOCATION = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.STRING);
@@ -76,7 +77,6 @@ public class TreeEntity extends Entity {
 
 		this.getEntityData().set(ORIGIN_POS, originBlock);
 		this.getEntityData().set(BLOCKS, blockPosMap);
-		this.getEntityData().set(ANGLE, 90f);
 		this.getEntityData().set(USED_TOOL, itemStack);
 		ResourceLocation treeTypeLocation = TreeRegistry.getTreeTypeLocation(treeType);
 		if (treeTypeLocation != null)
@@ -90,6 +90,7 @@ public class TreeEntity extends Entity {
 	protected void defineSynchedData() {
 		this.getEntityData().define(BLOCKS, new HashMap<>());
 		this.getEntityData().define(ANGLE, 90f);
+		this.getEntityData().define(LEAVES_DROPPED, false);
 		this.getEntityData().define(ORIGIN_POS, new BlockPos(0, 0, 0));
 		this.getEntityData().define(USED_TOOL, ItemStack.EMPTY);
 		this.getEntityData().define(FALL_DIRECTION, Direction.NORTH);
@@ -161,6 +162,14 @@ public class TreeEntity extends Entity {
 
 	public float getAngle() {
 		return this.getEntityData().get(ANGLE);
+	}
+
+	public void setLeavesDropped() {
+		this.getEntityData().set(LEAVES_DROPPED, true);
+	}
+
+	public boolean getLeavesDropped() {
+		return this.getEntityData().get(LEAVES_DROPPED);
 	}
 
 	public @NotNull Direction getDirection() {

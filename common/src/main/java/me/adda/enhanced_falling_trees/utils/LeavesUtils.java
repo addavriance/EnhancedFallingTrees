@@ -15,6 +15,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -26,17 +27,16 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class LeavesUtils {
 
-    public static void trySpawnLeafParticle(Level world, BlockPos pos, BlockState leavesState, BlockPos leavesPos, RandomSource random) {
+    public static void trySpawnLeafParticle(Level world, Vec3 pos, BlockState leavesState, BlockPos leavesPos, RandomSource random) {
         Minecraft client = Minecraft.getInstance();
 
-        double x = pos.getX() + random.nextDouble();
-        double y = pos.getY() - (random.nextDouble() / 3);
-        double z = pos.getZ() + random.nextDouble();
+        double x = pos.x + random.nextDouble();
+        double y = pos.y - (random.nextDouble() / 3);
+        double z = pos.z + random.nextDouble();
 
         double xV = random.nextGaussian() * 0.09D;
         double yV = random.nextFloat() * 0.1D;
         double zV = random.nextGaussian() * 0.03D;
-
 
         SimpleParticleType simpleParticle = ParticleRegistry.LEAVES.get();
 
