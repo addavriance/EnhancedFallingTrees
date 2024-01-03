@@ -38,6 +38,7 @@
 	"text.autoconfig.efallingtrees_common.option.isCrouchMiningAllowed": "Is Crouch mining allowed",
 	"text.autoconfig.efallingtrees_common.option.multiplyToolDamage": "Multiply tool damage",
 	"text.autoconfig.efallingtrees_common.option.multiplyFoodExhaustion": "Multiply food exhaustion",
+	"text.autoconfig.efallingtrees_common.option.leafParticleLifeTimeLength": "Leaf particle lifetime length",
 	"text.autoconfig.efallingtrees_common.option.treeLifetimeLength": "Tree lifetime length",
 	"text.autoconfig.efallingtrees_common.option.cactusLifetimeLength": "Cactus lifetime length",
 	"text.autoconfig.efallingtrees_common.option.bambooLifetimeLength": "Bamboo lifetime length",

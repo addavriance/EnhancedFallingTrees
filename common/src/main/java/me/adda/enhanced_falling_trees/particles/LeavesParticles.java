@@ -1,11 +1,12 @@
 package me.adda.enhanced_falling_trees.particles;
 
+import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
+import org.jetbrains.annotations.NotNull;
 
 public class LeavesParticles extends SimpleAnimatedParticle {
-    public static ClientLevel cworld;
     protected final float maxRotateSpeed;
     protected final int maxRotateTime;
     protected int rotateTime = 0;
@@ -24,8 +25,6 @@ public class LeavesParticles extends SimpleAnimatedParticle {
         this.gCol = 1f;
         this.bCol = 1f;
 
-        cworld = world;
-
         this.setSprite(sprites.get(random));
         this.setSize(0.02F, 0.02F);
 
@@ -34,7 +33,7 @@ public class LeavesParticles extends SimpleAnimatedParticle {
         this.maxRotateTime = (3 + random.nextInt(4 + 1)) * 20;
         this.maxRotateSpeed = (float) ((random.nextBoolean() ? -1 : 1) * (0.1f + 2.4f * random.nextFloat()) * (random.nextFloat() * (2 * Math.PI)) / 20f);
 
-        this.lifetime = 20;
+        this.lifetime = FallingTreesConfig.getCommonConfig().leafParticleLifeTimeLength;
 
     }
 
@@ -53,7 +52,7 @@ public class LeavesParticles extends SimpleAnimatedParticle {
         this.alpha = (-(1/(float)lifetime) * age + 1);
     }
 
-    public ParticleRenderType getRenderType() {
+    public @NotNull ParticleRenderType getRenderType() {
         return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 

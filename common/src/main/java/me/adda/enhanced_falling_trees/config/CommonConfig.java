@@ -14,6 +14,7 @@ public class CommonConfig implements ConfigData {
 	public boolean multiplyToolDamage = true;
 	public boolean multiplyFoodExhaustion = true;
 
+	public int leafParticleLifeTimeLength = 20;
 	public float treeLifetimeLength = 4;
 	public float cactusLifetimeLength = 2.5f;
 	public float bambooLifetimeLength = 2;
