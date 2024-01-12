@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import javax.imageio.ImageIO;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +42,13 @@ public class LeavesUtils {
 
         Particle particle = client.particleEngine.createParticle(simpleParticle, x, y, z, xV, yV, zV);
 
-        int leafColor = client.getBlockColors().getColor(leavesState, world, leavesPos);
+        int leafColor;
+
+        try {
+            leafColor = client.getBlockColors().getColor(leavesState, world, leavesPos);
+        } catch (Exception e) {
+            leafColor = leavesState.getMapColor(world, leavesPos).col;
+        }
 
         BakedModel model = client.getBlockRenderer().getBlockModel(leavesState);
 
