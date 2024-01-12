@@ -124,6 +124,7 @@ public class GroundUtils {
     }
 
     public static float calculateFallAngle(Integer[] groundIndexes) {
+
         int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE, max_index;
         float angle;
 
@@ -134,25 +135,37 @@ public class GroundUtils {
 
         max_index = Arrays.asList(groundIndexes).indexOf(max);
 
-        angle = (float) Math.toDegrees(java.lang.Math.atan((double) (max_index+1) / max));
+        angle = (float) Math.toDegrees(java.lang.Math.atan((double) max_index / max));
 
         if (max <= 0) {
+            int negativeCount = 0;
+            int totalElements = groundIndexes.length;
 
-            groundIndexes = GroundUtils.translateGroundIndexes(groundIndexes);
-
-            for (Integer index : groundIndexes) {
-                if (index > max) max = index;
+            for (int i = totalElements - 1; i >= 0; i--) {
+                if (groundIndexes[i] < 0) {
+                    negativeCount++;
+                } else {
+                    break;
+                }
             }
 
-            max_index = Arrays.asList(groundIndexes).indexOf(max);
+            if(negativeCount > totalElements / 2) {
+                groundIndexes = GroundUtils.translateGroundIndexes(groundIndexes);
 
-            angle = 90 + (float) Math.toDegrees(java.lang.Math.atan((double) (max_index + 1) / max));
+                for (Integer index : groundIndexes) {
+                    if (index > max) max = index;
+                }
 
-            boolean allEqual = Arrays.stream(groundIndexes).distinct().count() <= 1;
+                max_index = Arrays.asList(groundIndexes).indexOf(max);
 
-            if (groundIndexes[0] > 1 || (allEqual && groundIndexes[0] != 0)) angle = 90;
 
+                angle = 90 + (float) Math.toDegrees(java.lang.Math.atan((double) max_index / max));
+            } else {
+                angle = 90;
+            }
         }
+
+        angle = Float.isNaN(angle) ? 180 : angle;
 
         return angle;
     }
