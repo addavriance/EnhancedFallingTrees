@@ -14,9 +14,8 @@ public class CommonConfig implements ConfigData {
 	public boolean isCrouchMiningAllowed = true;
 	public boolean multiplyToolDamage = true;
 	public boolean multiplyFoodExhaustion = true;
-
-	public int leafParticleLifeTimeLength = 20;
 	@ConfigEntry.Gui.PrefixText
+	public float leafParticleLifeTimeLength = 1;
 	@ConfigEntry.Gui.PrefixText
 	public float treeLifetimeLength = 4;
 	public float cactusLifetimeLength = 2.5f;
