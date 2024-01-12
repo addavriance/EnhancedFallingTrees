@@ -108,6 +108,24 @@ public class GroundUtils {
         return lineCoordinates;
     }
 
+
+    public static boolean willBeInLiquid(TreeEntity entity) {
+        Vec3[] blockPoses = getFallBlockLine(entity);
+        int liquidBlockCount = 0;
+
+        for (Vec3 pos : blockPoses) {
+            BlockPos blockPos = new BlockPos((int) pos.x, (int) pos.y, (int) pos.z);
+            BlockState blockState = entity.level().getBlockState(blockPos);
+            BlockState blockAboveState = entity.level().getBlockState(blockPos.above());
+
+            if (blockState.getFluidState().isSource() || blockAboveState.getFluidState().isSource()) {
+                liquidBlockCount++;
+            }
+        }
+
+        return (liquidBlockCount / (float) blockPoses.length) >= 0.3;
+    }
+
     public static BlockPos calculateEndPos(BlockPos firstPoint, Direction fallDirection, double angleDegrees, int distance) {
         Vec3i lineVector = fallDirection.getNormal();
 
