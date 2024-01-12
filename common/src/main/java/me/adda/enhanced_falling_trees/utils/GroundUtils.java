@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Math;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 
 public class GroundUtils {
 
-    public static Integer[] getGroundIndexes(TreeEntity entity) {
+    public static Integer[] getGroundIndexes(TreeEntity entity, boolean includeWater) {
         int treeHeight = entity.getTreeHeight();
         int offset = 0;
 
@@ -27,7 +28,8 @@ public class GroundUtils {
             for (int j = 1; j <= treeHeight; j++) {
                 BlockPos checkPos = blockPos.above(j);
                 BlockState block = entity.level().getBlockState(checkPos);
-                if (block.isSolid() && !block.getTags().toList().contains(BlockTags.LEAVES)) {
+                boolean condition = includeWater ? (block.isSolid() || block.getBlock() instanceof LiquidBlock) : block.isSolid();
+                if (condition && !block.getTags().toList().contains(BlockTags.LEAVES)) {
                     groundIndex = j;
                 }
             }
@@ -35,7 +37,8 @@ public class GroundUtils {
                 for (int k = 1; k <= treeHeight; k++) {
                     BlockPos checkPos = blockPos.above().below(k);
                     BlockState block = entity.level().getBlockState(checkPos);
-                    if (!block.isSolid() || block.getTags().toList().contains(BlockTags.LEAVES)) {
+                    boolean condition = includeWater ? (block.isSolid() || block.getBlock() instanceof LiquidBlock) : block.isSolid();
+                    if (!condition || block.getTags().toList().contains(BlockTags.LEAVES)) {
                         groundIndex = -k;
                     } else {
                         break;
@@ -80,13 +83,25 @@ public class GroundUtils {
     }
 
     public static Vec3[] getFallBlockLine(TreeEntity entity) {
-        Integer[] indexes = getGroundIndexes(entity);
+        Integer[] indexes = getGroundIndexes(entity, false);
+
+        float angle = calculateFallAngle(indexes);
 
         int treeHeight = entity.getTreeHeight();
 
         BlockPos originPos = entity.getOriginPos().relative(entity.getDirection(), 1);
 
-        BlockPos endPos = calculateEndPos(originPos, entity.getDirection(), calculateFallAngle(indexes), treeHeight);
+        BlockPos endPos = calculateEndPos(originPos, entity.getDirection(), angle, treeHeight);
+
+        return calculateBlockLine(originPos, endPos);
+    }
+
+    public static Vec3[] getFallBlockLineByAngle(TreeEntity entity, float angle) {
+        int treeHeight = entity.getTreeHeight();
+
+        BlockPos originPos = entity.getOnPos().above().relative(entity.getDirection(), 1);
+
+        BlockPos endPos = calculateEndPos(originPos, entity.getDirection(), angle, treeHeight);
 
         return calculateBlockLine(originPos, endPos);
     }
