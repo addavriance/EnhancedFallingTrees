@@ -74,10 +74,13 @@ public class DefaultTree implements TreeType {
 
 				Vec3[] lineBlocks = GroundUtils.getFallBlockLine(entity);
 
+				int particleCount = FallingTreesConfig.getCommonConfig().leafParticleCount;
+
 				for (Vec3 lineBlock : lineBlocks) {
-					for (int i = 0; i < 25; i++)
+					for (int i = 0; i < particleCount; i++)
 						LeavesUtils.trySpawnLeafParticle(entity.level(), lineBlock, leavesState, leavesPos, entity.level().getRandom());
 				}
+
 			}
 		}
 	}

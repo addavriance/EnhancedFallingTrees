@@ -45,6 +45,7 @@
   "text.autoconfig.efallingtrees_common.option.bambooLifetimeLength": "Продолжительность жизни энтити бамбука",
   "text.autoconfig.efallingtrees_common.option.chorusLifetimeLength": "Продолжительность жизни энтити хоруса",
   "text.autoconfig.efallingtrees_common.option.leafParticleLifeTimeLength.@PrefixText": "Частицы",
+  "text.autoconfig.efallingtrees_common.option.leafParticleCount": "Количество листьев",
   "text.autoconfig.efallingtrees_common.option.treeLifetimeLength.@PrefixText": "Объекты",
 
   "text.autoconfig.efallingtrees_common.category.filter": "Фильтр",

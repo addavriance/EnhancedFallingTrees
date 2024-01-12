@@ -16,6 +16,7 @@ public class CommonConfig implements ConfigData {
 	public boolean multiplyFoodExhaustion = true;
 	@ConfigEntry.Gui.PrefixText
 	public float leafParticleLifeTimeLength = 1;
+	public int leafParticleCount = 5;
 	@ConfigEntry.Gui.PrefixText
 	public float treeLifetimeLength = 4;
 	public float cactusLifetimeLength = 2.5f;
