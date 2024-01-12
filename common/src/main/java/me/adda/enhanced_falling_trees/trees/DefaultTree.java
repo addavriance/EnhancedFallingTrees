@@ -10,7 +10,8 @@ import me.adda.enhanced_falling_trees.utils.LeavesUtils;
 import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Position;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.AxeItem;
@@ -20,7 +21,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class DefaultTree implements TreeType {
 	@Override
@@ -53,8 +57,9 @@ public class DefaultTree implements TreeType {
 			}
 
 			if (entity.tickCount == (int) (this.getFallAnimLength() * 20) - 5) {
+				SoundEvent sound = GroundUtils.willBeInLiquid(entity) ? SoundEvents.GENERIC_SPLASH : SoundRegistry.TREE_IMPACT.get();
 				if (FallingTreesConfig.getClientConfig().soundSettings.enabled) {
-					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundRegistry.TREE_IMPACT.get(),
+					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), sound,
 							SoundSource.BLOCKS, FallingTreesConfig.getClientConfig().soundSettings.endVolume, 1f, true);
 				}
 			}

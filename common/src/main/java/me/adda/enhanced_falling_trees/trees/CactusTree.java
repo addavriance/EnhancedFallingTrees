@@ -5,8 +5,11 @@ import me.adda.enhanced_falling_trees.api.TreeType;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.registry.SoundRegistry;
+import me.adda.enhanced_falling_trees.utils.GroundUtils;
 import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -48,8 +51,9 @@ public class CactusTree implements TreeType {
 			}
 
 			if (entity.tickCount == (int) (this.getFallAnimLength() * 20) - 5) {
+				SoundEvent sound = GroundUtils.willBeInLiquid(entity) ? SoundEvents.GENERIC_SPLASH : SoundRegistry.CACTUS_IMPACT.get();
 				if (FallingTreesConfig.getClientConfig().soundSettings.enabled) {
-					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundRegistry.CACTUS_IMPACT.get(),
+					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), sound,
 							SoundSource.BLOCKS, FallingTreesConfig.getClientConfig().soundSettings.endVolume, 1f, true);
 				}
 			}
