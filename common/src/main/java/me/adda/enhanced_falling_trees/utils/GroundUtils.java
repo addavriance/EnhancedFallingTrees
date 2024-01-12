@@ -50,18 +50,18 @@ public class GroundUtils {
         return indexes;
     }
 
-//    public static BlockPos[] getGroundBlocksPoses(TreeEntity entity, Integer[] indexes) {
-//        int treeHeight = entity.getTreeHeight();
-//        BlockPos[] blocksPoses = new BlockPos[treeHeight];
-//
-//        for (int i = 0; i < treeHeight; i++) {
-//            BlockPos blockPos = entity.getOnPos().offset(entity.getDirection().getNormal()).relative(entity.getDirection(), i);
-//
-//            blocksPoses[i] = (blockPos.offset(0, indexes[i], 0));
-//        }
-//
-//        return blocksPoses;
-//    }
+    public static BlockPos[] getGroundBlocksPoses(TreeEntity entity, Integer[] indexes) {
+        int treeHeight = entity.getTreeHeight();
+        BlockPos[] blocksPoses = new BlockPos[treeHeight];
+
+        for (int i = 0; i < treeHeight; i++) {
+            BlockPos blockPos = entity.getOnPos().offset(entity.getDirection().getNormal()).relative(entity.getDirection(), i);
+
+            blocksPoses[i] = (blockPos.offset(0, indexes[i], 0));
+        }
+
+        return blocksPoses;
+    }
 
     public static Integer[] translateGroundIndexes(Integer[] groundIndexes) {
         int length = groundIndexes.length;
