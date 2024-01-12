@@ -4,6 +4,7 @@ import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.config.common.LimitationsConfig;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.network.ConfigPacket;
+import me.adda.enhanced_falling_trees.utils.GroundUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.Set;
@@ -36,15 +38,22 @@ public interface TreeType {
 	}
 
 	default void entityTick(TreeEntity entity) {
+		int counter = 0;
+
 		Level level = entity.level();
+
 		if (entity.tickCount >= entity.getMaxLifeTimeTick()) {
+			Vec3[] fallBlockLine = GroundUtils.getFallBlockLine(entity);
 			ItemStack usedItem = entity.getUsedTool();
 			for (Map.Entry<BlockPos, BlockState> entry : entity.getBlocks().entrySet()) {
 				if (shouldDropItems(entry.getValue())) {
 					BlockEntity blockEntity = null;
 					if (entry.getValue().hasBlockEntity())
 						blockEntity = level.getBlockEntity(entry.getKey().offset(entity.getOriginPos()));
-					Block.dropResources(entry.getValue(), level, entity.getOriginPos(), blockEntity, entity.owner, usedItem);
+					BlockPos pos = new BlockPos((int) fallBlockLine[counter].x, (int) fallBlockLine[counter].y, (int) fallBlockLine[counter].z);
+					Block.dropResources(entry.getValue(), level, pos, blockEntity, entity.owner, usedItem);
+
+					counter = counter == fallBlockLine.length - 1 ? 0 : counter + 1;
 				}
 			}
 
