@@ -35,6 +35,7 @@ public class TreeEntity extends Entity {
 	public static final EntityDataAccessor<Map<BlockPos, BlockState>> BLOCKS = SynchedEntityData.defineId(TreeEntity.class, BlockMapEntityData.BLOCK_MAP);
 	public static final EntityDataAccessor<BlockPos> ORIGIN_POS = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.BLOCK_POS);
 	public static final EntityDataAccessor<Float> ANGLE = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.FLOAT);
+	public static final EntityDataAccessor<Float> TARGET_ANGLE = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.FLOAT);
 	public static final EntityDataAccessor<Boolean> LEAVES_DROPPED = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.BOOLEAN);
 	public static final EntityDataAccessor<ItemStack> USED_TOOL = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.ITEM_STACK);
 	public static final EntityDataAccessor<Direction> FALL_DIRECTION = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.DIRECTION);
@@ -78,6 +79,8 @@ public class TreeEntity extends Entity {
 		this.getEntityData().set(ORIGIN_POS, originBlock);
 		this.getEntityData().set(BLOCKS, blockPosMap);
 		this.getEntityData().set(USED_TOOL, itemStack);
+		this.getEntityData().set(ANGLE, 0f);
+		this.getEntityData().set(TARGET_ANGLE, 0f);
 		ResourceLocation treeTypeLocation = TreeRegistry.getTreeTypeLocation(treeType);
 		if (treeTypeLocation != null)
 			this.getEntityData().set(TREE_TYPE_LOCATION, treeTypeLocation.toString());
@@ -89,7 +92,8 @@ public class TreeEntity extends Entity {
 	@Override
 	protected void defineSynchedData() {
 		this.getEntityData().define(BLOCKS, new HashMap<>());
-		this.getEntityData().define(ANGLE, 90f);
+		this.getEntityData().define(ANGLE, 0f);
+		this.getEntityData().define(TARGET_ANGLE, 0f);
 		this.getEntityData().define(LEAVES_DROPPED, false);
 		this.getEntityData().define(ORIGIN_POS, new BlockPos(0, 0, 0));
 		this.getEntityData().define(USED_TOOL, ItemStack.EMPTY);
@@ -154,6 +158,14 @@ public class TreeEntity extends Entity {
 
 	public ItemStack getUsedTool() {
 		return this.getEntityData().get(USED_TOOL);
+	}
+
+	public void setTargetAngle(float angle) {
+		this.getEntityData().set(TARGET_ANGLE, angle);
+	}
+
+	public float getTargetAngle() {
+		return this.getEntityData().get(TARGET_ANGLE);
 	}
 
 	public void setAngle(float angle) {
