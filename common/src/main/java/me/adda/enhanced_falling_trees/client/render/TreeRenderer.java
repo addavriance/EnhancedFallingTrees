@@ -15,13 +15,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.Arrays;
 import java.util.Map;
 
 @Environment(EnvType.CLIENT)
@@ -34,7 +32,6 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 	@Override
 	public void render(TreeEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
 		TreeType treeType = entity.getTreeType();
-		Level treeLevel = entity.level();
 
 		if (treeType == null) return;
 
@@ -42,25 +39,33 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 
 		Map<BlockPos, BlockState> blocks = entity.getBlocks();
 
+		boolean willBeInLiquid = GroundUtils.willBeInLiquid(entity);
+
 		float fallAnimLength = treeType.getFallAnimLength();
+
+		float time = (float) (entity.getLifetime(partialTick) * (Math.PI / 2) / fallAnimLength);
 
 		float bounceHeight = treeType.getBounceAngleHeight();
 		float bounceAnimLength = treeType.getBounceAnimLength();
 
-		boolean hasBlockAtRoot = entity.getBlockStateOn().isAir() || treeLevel.getBlockState(entity.getOnPos().above().offset(entity.getDirection().getNormal())).isSolid();
+		Integer[] groundIndexes = GroundUtils.getGroundIndexes(entity, false);
+		Integer[] groundIndexesWithWater = GroundUtils.getGroundIndexes(entity, true);
 
-		Integer[] groundIndexes = GroundUtils.getGroundIndexes(entity);
+		float averageWaterHeight = GroundUtils.calculateAverageWaterHeight(entity, groundIndexesWithWater);
 
-		float fallAngle = hasBlockAtRoot ? 15 : GroundUtils.calculateFallAngle(groundIndexes);
+		float fallAngleWithWater = GroundUtils.calculateFallAngle(groundIndexesWithWater) + (GroundUtils.calculateFallAngle(groundIndexesWithWater) - GroundUtils.calculateFallAngle(groundIndexesWithWater)*averageWaterHeight);
 
-		entity.setAngle(lerp(entity.getAngle(), fallAngle, 0.05f));
+		float fallAngle = bumpCos(time) * entity.getTargetAngle() <= 10 && willBeInLiquid ? fallAngleWithWater : GroundUtils.calculateFallAngle(groundIndexes);
 
-		float time = (float) (entity.getLifetime(partialTick) * (Math.PI / 2) / fallAnimLength);
+		entity.setTargetAngle(Math.lerp(entity.getTargetAngle(), fallAngle, bumpCos(time) * entity.getTargetAngle() <= 1 && willBeInLiquid ? 0.01f : 0.05f));
 
-		float fallAnim = bumpCos(time) * entity.getAngle();;
-		float bounceAnim = bumpSin((float) ((time - Math.PI / 2) / (bounceAnimLength / (fallAnimLength * 2)))) * bounceHeight;
+		float fallAnim = bumpCos(time) * entity.getTargetAngle();
 
-		float animation = (fallAnim + bounceAnim) - entity.getAngle();;
+		entity.setAngle(entity.getTargetAngle() - fallAnim);
+
+		float bounceAnim = willBeInLiquid ? bumpSinLiquid(((time+bounceAnimLength) * bounceHeight)) : bumpSin((float) ((time - Math.PI / 2) / (bounceAnimLength / (fallAnimLength * 2)))) * bounceHeight;
+
+		float totalAnimation = (fallAnim + bounceAnim) - entity.getTargetAngle();
 
 		Direction direction = entity.getDirection().getOpposite();
 		int distance = getDistance(treeType, blocks, 0, direction.getOpposite());
@@ -69,7 +74,7 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		pivot.rotateY(Math.toRadians(-direction.toYRot()));
 		poseStack.translate(-pivot.x, 0, -pivot.z);
 
-		Vector3f vector = new Vector3f(Math.toRadians(animation), 0, 0);
+		Vector3f vector = new Vector3f(Math.toRadians(totalAnimation), 0, 0);
 		vector.rotateY(Math.toRadians(-direction.toYRot()));
 		Quaternionf quaternion = new Quaternionf().identity().rotateX(vector.x).rotateZ(vector.z);
 		poseStack.mulPose(quaternion);
@@ -118,8 +123,7 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		return (float) Math.max(0, Math.sin(Math.clamp(-Math.PI, Math.PI, time)));
 	}
 
-	private float lerp(float a, float b, float f) {
-		return (float) ((a * (1.0 - f)) + (b * f));
+	private float bumpSinLiquid(float time) {
+		return Math.sin(time);
 	}
-
 }
