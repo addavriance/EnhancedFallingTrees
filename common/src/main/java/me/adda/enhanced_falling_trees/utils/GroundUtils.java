@@ -169,4 +169,20 @@ public class GroundUtils {
 
         return angle;
     }
+
+    public static float calculateAverageWaterHeight(TreeEntity entity, Integer[] groundIndexesWithWater) {
+        int counter = 0;
+        float height = 0;
+        BlockPos[] blockPoses = GroundUtils.getGroundBlocksPoses(entity, groundIndexesWithWater);
+
+        for (BlockPos pos : blockPoses) {
+            BlockState blockState = entity.level().getBlockState(pos);
+            if (blockState.getFluidState().isSource()){
+                LiquidBlock liquid = (LiquidBlock) blockState.getBlock();
+                height+=liquid.getFluidState(blockState).getOwnHeight();
+                counter++;
+            }
+        }
+        return height/counter;
+    }
 }
