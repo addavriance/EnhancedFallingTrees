@@ -1,10 +1,10 @@
 {
-	"config.efallingtrees.title": "Enhanced Falling Tree's Config",
+	"config.efallingtrees.title": "Enhanced Falling Trees Config",
 	"config.efallingtrees.client": "Client",
 	"config.efallingtrees.common": "Common",
 	"config.efallingtrees.common.tooltip": "Can not be changed in game",
 
-	"text.autoconfig.efallingtrees_client.title": "Enhanced Falling Tree's Config",
+	"text.autoconfig.efallingtrees_client.title": "Enhanced Falling Trees Config",
 
 	"text.autoconfig.efallingtrees_client.category.default": "Default",
 	"text.autoconfig.efallingtrees_client.option.invertCrouchMining": "Invert Crouch mining",
@@ -32,7 +32,7 @@
 	"text.autoconfig.efallingtrees_client.option.animation.chorusProperties.bounceAngleHeight": "Bounce angle height",
 	"text.autoconfig.efallingtrees_client.option.animation.chorusProperties.bounceAnimLength": "Bounce animation length",
 
-	"text.autoconfig.efallingtrees_common.title": "Enhanced Falling Tree's Config",
+	"text.autoconfig.efallingtrees_common.title": "Enhanced Falling Trees Config",
 
 	"text.autoconfig.efallingtrees_common.category.default": "Default",
 	"text.autoconfig.efallingtrees_common.option.isCrouchMiningAllowed.@PrefixText": "Player",
