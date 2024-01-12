@@ -10,11 +10,14 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
 @Config(name = FallingTrees.MOD_ID + "_common")
 public class CommonConfig implements ConfigData {
+	@ConfigEntry.Gui.PrefixText
 	public boolean isCrouchMiningAllowed = true;
 	public boolean multiplyToolDamage = true;
 	public boolean multiplyFoodExhaustion = true;
 
 	public int leafParticleLifeTimeLength = 20;
+	@ConfigEntry.Gui.PrefixText
+	@ConfigEntry.Gui.PrefixText
 	public float treeLifetimeLength = 4;
 	public float cactusLifetimeLength = 2.5f;
 	public float bambooLifetimeLength = 2;
