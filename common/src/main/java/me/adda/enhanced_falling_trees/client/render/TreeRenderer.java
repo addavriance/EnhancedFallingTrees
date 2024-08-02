@@ -76,7 +76,7 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		float totalAnimation = (fallAnim + bounceAnim) - entity.getTargetAngle();
 
 		Direction direction = entity.getDirection().getOpposite();
-		int distance = getDistance(treeType, blocks, 0, direction.getOpposite());
+		int distance = getDistance(blocks, 0, direction.getOpposite());
 
 		Vector3f pivot =  new Vector3f(0, 0, (.5f + distance) * treeType.fallAnimationEdgeDistance());
 		pivot.rotateY(Math.toRadians(-direction.toYRot()));
@@ -116,11 +116,32 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		return null;
 	}
 
-	private int getDistance(TreeType treeType, Map<BlockPos, BlockState> blocks, int distance, Direction direction) {
-		BlockPos nextBlockPos = new BlockPos(direction.getNormal().multiply(distance + 1));
-		if (blocks.containsKey(nextBlockPos) && treeType.baseBlockCheck(blocks.get(nextBlockPos)))
-			return getDistance(treeType, blocks, distance + 1, direction);
+	private int getDistance(Map<BlockPos, BlockState> blocks, int distance, Direction direction) {
+		int currentWidth = getWidthAtDistance(blocks, distance, direction);
+		int nextWidth = getWidthAtDistance(blocks, distance + 1, direction);
+
+		if (nextWidth >= currentWidth * 0.7 && blocks.containsKey(new BlockPos(direction.getNormal().multiply(distance + 1)))) {
+			return getDistance(blocks, distance + 1, direction);
+		}
 		return distance;
+	}
+
+	private int getWidthAtDistance(Map<BlockPos, BlockState> blocks, int distance, Direction direction) {
+		int width = 0;
+		BlockPos center = new BlockPos(direction.getNormal().multiply(distance));
+
+		int maxRadius = 5;
+
+		for (int x = -maxRadius; x <= maxRadius; x++) {
+			for (int y = -maxRadius; y <= maxRadius; y++) {
+				BlockPos pos = center.offset(direction.getClockWise().getNormal().multiply(x)).above(y);
+				if (blocks.containsKey(pos)) {
+					width++;
+				}
+			}
+		}
+
+		return width;
 	}
 
 	private float bumpCos(float time) {
