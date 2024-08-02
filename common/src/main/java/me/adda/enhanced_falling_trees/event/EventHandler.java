@@ -16,6 +16,7 @@ import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.network.ConfigPacket;
 import me.adda.enhanced_falling_trees.registry.EntityRegistry;
+import me.adda.enhanced_falling_trees.trees.DefaultTree;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -86,11 +87,19 @@ public class EventHandler {
 		Set<BlockPos> treeBlockPos = treeType.blockGatheringAlgorithm(blockPos, level);
 		long baseAmount = treeBlockPos.stream().filter(blockPos1 -> treeType.baseBlockCheck(level.getBlockState(blockPos1))).count();
 
-		if (!mainItem.isEmpty()) {
-			mainItem.hurtAndBreak(commonConfig.multiplyToolDamage ? (int) baseAmount : 1, player, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
-		}
+		if (treeType instanceof DefaultTree)
+			if (!mainItem.isEmpty() && treeType.allowedTool(mainItem)) {
+				mainItem.hurtAndBreak(commonConfig.multiplyToolDamage ? (int) baseAmount : 1, player, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+			} else {
+				player.causeFoodExhaustion(2F * (commonConfig.multiplyFoodExhaustion ? (int) baseAmount : 1));
+			}
+		else
+			if (!mainItem.isEmpty() && treeType.allowedTool(mainItem)) {
+				mainItem.hurtAndBreak(1, player, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+			} else {
+				player.causeFoodExhaustion(2);
+			}
 
-		player.causeFoodExhaustion(0.05f * (commonConfig.multiplyFoodExhaustion ? (int) baseAmount : 1));
 		player.awardStat(Stats.BLOCK_MINED.get(blockState.getBlock()), (int) baseAmount);
 
 		TreeEntity.destroyTree(treeBlockPos, blockPos, level, treeType, player);
