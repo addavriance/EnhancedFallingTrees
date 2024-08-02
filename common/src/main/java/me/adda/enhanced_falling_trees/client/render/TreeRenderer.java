@@ -130,7 +130,7 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		int width = 0;
 		BlockPos center = new BlockPos(direction.getNormal().multiply(distance));
 
-		int maxRadius = 5;
+		int maxRadius = 3;
 
 		for (int x = -maxRadius; x <= maxRadius; x++) {
 			for (int y = -maxRadius; y <= maxRadius; y++) {
