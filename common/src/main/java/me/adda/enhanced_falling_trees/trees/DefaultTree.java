@@ -100,38 +100,40 @@ public class DefaultTree implements TreeType {
 
 		Set<BlockPos> leavesBlocks = new HashSet<>();
 
-		loopLogs(level, blockPos, logBlocks, loopedLogBlocks, leavesBlocks);
+		loopLogs(level, blockPos, blockPos, logBlocks, loopedLogBlocks, leavesBlocks, 0);
 
 		blocks.addAll(logBlocks);
 		blocks.addAll(leavesBlocks);
 		return blocks;
 	}
 
-	public void loopLogs(LevelAccessor level, BlockPos originPos, Set<BlockPos> logBlocks, Set<BlockPos> loopedLogBlocks, Set<BlockPos> leavesBlocks) {
-		if (loopedLogBlocks.contains(originPos))
-			return;
+	public void loopLogs(LevelAccessor level, BlockPos originPos, BlockPos initialPos, Set<BlockPos> logBlocks, Set<BlockPos> loopedLogBlocks, Set<BlockPos> leavesBlocks, int distance) {
+		if (loopedLogBlocks.contains(originPos)) return;
+
+		boolean isMovingUp = originPos.getY() > initialPos.getY();
+		if (!isMovingUp && distance > FallingTreesConfig.getCommonConfig().limitations.maxTreeDistance) return;
 
 		loopedLogBlocks.add(originPos);
 
 		BlockState blockState = level.getBlockState(originPos);
-		if (this.baseBlockCheck(blockState)) {
+		if (this.baseBlockCheck(blockState) && blockState.getBlock() == level.getBlockState(initialPos).getBlock()) {
 			logBlocks.add(originPos);
 
 			for (BlockPos offset : BlockPos.betweenClosed(new BlockPos(-1, 0, -1), new BlockPos(1, 1, 1))) {
 				BlockPos neighborPos = originPos.offset(offset);
-				loopLogs(level, neighborPos, logBlocks, loopedLogBlocks, leavesBlocks);
+				loopLogs(level, neighborPos, initialPos, logBlocks, loopedLogBlocks, leavesBlocks, isMovingUp ? distance : distance + 1);
 			}
 
 			Set<BlockPos> loopedLeavesBlocks = new HashSet<>();
 
 			for (Direction direction : Direction.values()) {
 				BlockPos neighborPos = originPos.offset(direction.getNormal());
-				loopLeaves(level, neighborPos, 1, leavesBlocks, loopedLeavesBlocks);
+				loopLeaves(level, neighborPos, initialPos, 1, leavesBlocks, loopedLeavesBlocks, distance + 1);
 			}
 		}
 	}
 
-	public void loopLeaves(LevelAccessor level, BlockPos originPos, int distance, Set<BlockPos> leavesBlocks, Set<BlockPos> loopedLeavesBlocks) {
+	public void loopLeaves(LevelAccessor level, BlockPos originPos, BlockPos initialPos, int distance, Set<BlockPos> leavesBlocks, Set<BlockPos> loopedLeavesBlocks, int treeDistance) {
 		BlockState blockState = level.getBlockState(originPos);
 		if ((blockState.hasProperty(BlockStateProperties.DISTANCE) && blockState.getValue(BlockStateProperties.DISTANCE) != distance) ||
 				distance >= 7 || loopedLeavesBlocks.contains(originPos))
@@ -145,7 +147,7 @@ public class DefaultTree implements TreeType {
 			for (Direction direction : Direction.values()) {
 				BlockPos neighborPos = originPos.offset(direction.getNormal());
 				if (distance < FallingTreesConfig.getCommonConfig().limitations.maxLeavesDistance)
-					loopLeaves(level, neighborPos, distance + 1, leavesBlocks, loopedLeavesBlocks);
+					loopLeaves(level, neighborPos, initialPos, distance + 1, leavesBlocks, loopedLeavesBlocks, treeDistance + 1);
 			}
 		}
 	}
@@ -154,10 +156,12 @@ public class DefaultTree implements TreeType {
 	public float getFallAnimLength() {
 		return FallingTreesConfig.getClientConfig().animation.treeProperties.fallAnimLength;
 	}
+
 	@Override
 	public float getBounceAngleHeight() {
 		return FallingTreesConfig.getClientConfig().animation.treeProperties.bounceAngleHeight;
 	}
+
 	@Override
 	public float getBounceAnimLength() {
 		return FallingTreesConfig.getClientConfig().animation.treeProperties.bounceAnimLength;
