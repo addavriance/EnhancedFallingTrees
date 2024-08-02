@@ -58,7 +58,7 @@ public class DefaultTree implements TreeType {
 			}
 
 			if (entity.tickCount == (int) (this.getFallAnimLength() * 20) - 5) {
-				SoundEvent sound = GroundUtils.willBeInLiquid(entity) ? SoundEvents.GENERIC_SPLASH : SoundRegistry.TREE_IMPACT.get();
+				SoundEvent sound = GroundUtils.willBeInLiquid(entity) ? SoundEvents.PLAYER_SPLASH : SoundRegistry.TREE_IMPACT.get();
 				if (FallingTreesConfig.getClientConfig().soundSettings.enabled) {
 					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), sound,
 							SoundSource.BLOCKS, FallingTreesConfig.getClientConfig().soundSettings.endVolume, 1f, true);
