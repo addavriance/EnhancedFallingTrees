@@ -45,7 +45,9 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 
 		float time = (float) (entity.getLifetime(partialTick) * (Math.PI / 2) / fallAnimLength);
 
-		float bounceHeight = treeType.getBounceAngleHeight();
+		float maxBounceHeight = treeType.getBounceAngleHeight();
+
+		float bounceHeight = Math.clamp(0, maxBounceHeight, Math.round(entity.getTargetAngle()/10));
 		float bounceAnimLength = treeType.getBounceAnimLength();
 
 		Integer[] groundIndexes = GroundUtils.getGroundIndexes(entity, false);
@@ -63,7 +65,13 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 
 		entity.setAngle(entity.getTargetAngle() - fallAnim);
 
-		float bounceAnim = willBeInLiquid ? bumpSinLiquid(((time+bounceAnimLength) * bounceHeight)) : bumpSin((float) ((time - Math.PI / 2) / (bounceAnimLength / (fallAnimLength * 2)))) * bounceHeight;
+		float bounceAnim;
+
+		if (willBeInLiquid) {
+			bounceAnim = bumpSinLiquid((time + bounceAnimLength) * maxBounceHeight);
+		} else {
+			bounceAnim = bumpSin((float) ((time - Math.PI / 2) / (bounceAnimLength / (fallAnimLength * 2)))) * bounceHeight;
+		}
 
 		float totalAnimation = (fallAnim + bounceAnim) - entity.getTargetAngle();
 
