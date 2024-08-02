@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class DefaultTree implements TreeType {
+
 	@Override
 	public boolean baseBlockCheck(BlockState blockState) {
 		return FallingTreesConfig.getCommonConfig().filter.log.isValid(blockState.getBlock());
@@ -40,7 +41,7 @@ public class DefaultTree implements TreeType {
 	}
 
 	@Override
-	public boolean allowedTool(ItemStack itemStack, BlockState blockState) {
+	public boolean allowedTool(ItemStack itemStack) {
 		return itemStack.getItem() instanceof AxeItem || itemStack.is(ItemTags.AXES);
 	}
 

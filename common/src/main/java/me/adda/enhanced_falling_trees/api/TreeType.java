@@ -33,7 +33,7 @@ public interface TreeType {
 		return baseBlockCheck(blockState);
 	}
 
-	default boolean allowedTool(ItemStack itemStack, BlockState blockState) {
+	default boolean allowedTool(ItemStack itemStack) {
 		return true;
 	}
 
@@ -63,8 +63,7 @@ public interface TreeType {
 
 	default boolean allowedToFall(Player player, LevelAccessor level, BlockPos blockPos, LimitationsConfig.FallRequirements fallRequirements) {
 		ItemStack mainItem = player.getItemBySlot(EquipmentSlot.MAINHAND);
-		BlockState blockState = level.getBlockState(blockPos);
-		if (fallRequirements.onlyRequiredTool && this.allowedTool(mainItem, blockState)) return false;
+		if (fallRequirements.onlyRequiredTool && this.allowedTool(mainItem)) return false;
 
 		Set<BlockPos> treeBlockPos = this.blockGatheringAlgorithm(blockPos, level);
 		if (treeBlockPos.stream().noneMatch(blockPos1 -> this.extraRequiredBlockCheck(level.getBlockState(blockPos1)))) return false;
