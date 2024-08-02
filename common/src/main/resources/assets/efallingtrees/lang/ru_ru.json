@@ -61,7 +61,7 @@
   "text.autoconfig.efallingtrees_common.option.filter.leaves.blacklistedBlocks": "Запрещенные блоки листвы",
 
   "text.autoconfig.efallingtrees_common.category.limitations": "Ограничения",
-  "text.autoconfig.efallingtrees_common.option.limitations.maxLeavesDistance": "Максимальное расстояние до листвы",
+  "text.autoconfig.efallingtrees_common.option.limitations.maxLeavesDistance": "Максимальное расстояние листвы",
   "text.autoconfig.efallingtrees_common.option.limitations.maxTreeDistance": "Максимальное расстояние дерева",
 
   "text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements": "Требования для падения дерева",
