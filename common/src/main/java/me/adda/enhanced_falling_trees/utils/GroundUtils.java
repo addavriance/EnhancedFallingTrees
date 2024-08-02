@@ -89,7 +89,7 @@ public class GroundUtils {
 
         int treeHeight = entity.getTreeHeight();
 
-        BlockPos originPos = entity.getOriginPos().relative(entity.getDirection(), 1);
+        BlockPos originPos = entity.getOnPos().above().relative(entity.getDirection(), 1);
 
         BlockPos endPos = calculateEndPos(originPos, entity.getDirection(), angle, treeHeight);
 
