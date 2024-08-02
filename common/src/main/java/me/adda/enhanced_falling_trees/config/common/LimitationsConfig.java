@@ -4,6 +4,7 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
 public class LimitationsConfig {
 	public int maxLeavesDistance = 7;
+	public int maxTreeDistance = 7;
 
 	@ConfigEntry.Gui.CollapsibleObject
 	public FallRequirements treeFallRequirements = new FallRequirements();

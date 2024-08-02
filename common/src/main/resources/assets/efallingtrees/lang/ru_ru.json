@@ -62,6 +62,7 @@
 
   "text.autoconfig.efallingtrees_common.category.limitations": "Ограничения",
   "text.autoconfig.efallingtrees_common.option.limitations.maxLeavesDistance": "Максимальное расстояние до листвы",
+  "text.autoconfig.efallingtrees_common.option.limitations.maxTreeDistance": "Максимальное расстояние дерева",
 
   "text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements": "Требования для падения дерева",
   "text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.maxAmountType": "Тип максимального количества",

@@ -63,6 +63,7 @@
 
 	"text.autoconfig.efallingtrees_common.category.limitations": "Limitations",
 	"text.autoconfig.efallingtrees_common.option.limitations.maxLeavesDistance": "Max leaves distance",
+	"text.autoconfig.efallingtrees_common.option.limitations.maxTreeDistance": "Max tree distance",
 
 	"text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements": "Tree Fall Requirements",
 	"text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.maxAmountType": "Max Amount type",
