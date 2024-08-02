@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -27,8 +28,9 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class LeavesUtils {
 
+    private static final Minecraft client = Minecraft.getInstance();
+
     public static void trySpawnLeafParticle(Level world, Vec3 pos, BlockState leavesState, BlockPos leavesPos, RandomSource random) {
-        Minecraft client = Minecraft.getInstance();
 
         double x = pos.x + random.nextDouble();
         double y = pos.y - (random.nextDouble() / 3);
@@ -45,18 +47,20 @@ public class LeavesUtils {
         int leafColor;
 
         try {
-            leafColor = client.getBlockColors().getColor(leavesState, world, leavesPos);
+            leafColor = client.getBlockColors().getColor(leavesState, world, leavesPos, 0);
         } catch (Exception e) {
             leafColor = leavesState.getMapColor(world, leavesPos).col;
         }
 
-        BakedModel model = client.getBlockRenderer().getBlockModel(leavesState);
+        BakedModel model = client.getModelManager().getBlockModelShaper().getBlockModel(leavesState);
 
-        List<BakedQuad> quads = model.getQuads(leavesState, null, random);
+        List<BakedQuad> quads = model.getQuads(leavesState, Direction.DOWN, random);
+
+        TextureAtlasSprite sprite = quads.isEmpty() ? model.getParticleIcon() : quads.get(0).getSprite();
 
         boolean shouldColor = quads.isEmpty() || quads.stream().anyMatch(BakedQuad::isTinted);
 
-        ResourceLocation texture = spriteToTexture(model.getParticleIcon());
+        ResourceLocation texture = spriteToTexture(sprite);
 
         double[] leaves_rgb = calculateLeafColor(texture, shouldColor, leafColor, client);
 
@@ -66,7 +70,6 @@ public class LeavesUtils {
 
         if (particle != null)
             particle.setColor(red, green, blue);
-
     }
 
     private static double[] calculateLeafColor(ResourceLocation texture, boolean shouldColor, int blockColor, Minecraft client) {
