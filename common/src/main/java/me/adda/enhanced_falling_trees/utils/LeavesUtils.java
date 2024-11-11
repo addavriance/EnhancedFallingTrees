@@ -76,39 +76,22 @@ public class LeavesUtils {
     }
 
     private static float calculateLightLevel(ClientLevel level) {
-        long timeOfDay = level.getDayTime() % 24000;
+        long time = level.getDayTime() % 24000;
+        float dayLight;
 
-        final long NOON = 6000;
-        final long SUNSET = 12000;
-        final long NIGHT = 13000;
-        final long SUNRISE = 23000;
-
-        float lightLevel;
-
-        if (timeOfDay >= NOON && timeOfDay < SUNSET) {
-            lightLevel = 1.0f;
-        } else if (timeOfDay >= SUNSET && timeOfDay < NIGHT) {
-            float progress = (float)(timeOfDay - SUNSET) / (NIGHT - SUNSET);
-            lightLevel = 1.0f - (progress * 0.5f);
-        } else if (timeOfDay >= NIGHT && timeOfDay < SUNRISE) {
-            lightLevel = 0.5f;
+        if (time < 12000) {
+            dayLight = 1.0f;
+        } else if (time < 13000) {
+            dayLight = 1.0f - (0.5f * (time - 12000) / 1000f);
+        } else if (time < 23000) {
+            dayLight = 0.5f;
         } else {
-            float progress;
-            if (timeOfDay >= SUNRISE) {
-                progress = (float)(timeOfDay - SUNRISE) / (24000 - SUNRISE);
-            } else {
-                progress = (float)(timeOfDay + (24000 - SUNRISE)) / (24000 - SUNRISE);
-            }
-            lightLevel = 0.5f + (progress * 0.5f);
+            dayLight = 0.5f + (0.5f * (time - 23000) / 1000f);
         }
 
-        float rainLevel = level.getRainLevel(client.getFrameTime());
-        float thunderLevel = level.getThunderLevel(client.getFrameTime());
+        float weather = (1.0f - level.getRainLevel(0) * 0.2f) * (1.0f - level.getThunderLevel(0) * 0.2f);
 
-        lightLevel *= (1.0F - rainLevel * 0.4F);
-        lightLevel *= (1.0F - thunderLevel * 0.4F);
-
-        return Math.max(MIN_LIGHT_LEVEL, lightLevel);
+        return Math.max(MIN_LIGHT_LEVEL, dayLight * weather);
     }
 
     private static double[] calculateLeafColor(ResourceLocation texture, boolean shouldColor, int blockColor) {
