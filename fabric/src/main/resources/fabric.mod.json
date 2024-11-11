@@ -19,6 +19,9 @@
 		"main": [
           "me.adda.enhanced_falling_trees.fabric.FallingTreesFabric"
 		],
+	    "client": [
+		  "me.adda.enhanced_falling_trees.fabric.FallingTreesClientFabric"
+		],
 		"modmenu": [
           "me.adda.enhanced_falling_trees.fabric.ModMenuIntegration"
 		]
