@@ -8,6 +8,7 @@ import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.utils.GroundUtils;
 import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
@@ -20,10 +21,25 @@ import java.util.*;
 
 public class DefaultTree implements TreeType {
 	private static final int MAX_TREE_HEIGHT = 32;
+	private static final Direction[] DIRECTIONS = Direction.values();
 
 	public record TreeStructure(Set<BlockPos> logBlocks, Set<BlockPos> mainTrunk) {}
-	public record LeafSearchNode(BlockPos pos, int distance) {}
 	public record SearchNode(BlockPos pos, int verticalDistance) {}
+
+	private record LeafSearchNode(BlockPos pos, int distance) {
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			LeafSearchNode that = (LeafSearchNode) o;
+			return pos.equals(that.pos);
+		}
+
+		@Override
+		public int hashCode() {
+			return pos.hashCode();
+		}
+	}
 
 	@Override
 	public boolean baseBlockCheck(BlockState blockState) {
@@ -56,7 +72,7 @@ public class DefaultTree implements TreeType {
 			}
 		}
 
-		if (entity.tickCount == (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
+		if (entity.tickCount >= (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
 			handleParticles(entity);
 		}
 	}
@@ -180,58 +196,68 @@ public class DefaultTree implements TreeType {
 		return horizontalDistance <= maxDistance && verticalDistance <= MAX_TREE_HEIGHT;
 	}
 
+	private boolean isMatchingLog(BlockState state, BlockState initialState) {
+		return baseBlockCheck(state) && state.getBlock() == initialState.getBlock();
+	}
+
 	private Set<BlockPos> gatherLeaves(TreeStructure treeStructure, LevelAccessor level) {
 		Set<BlockPos> leaves = new HashSet<>();
 		Set<BlockPos> processed = new HashSet<>();
 		Queue<LeafSearchNode> queue = new LinkedList<>();
 
-		for (BlockPos logPos : treeStructure.logBlocks()) {
-			for (int x = -1; x <= 1; x++) {
-				for (int y = -1; y <= 1; y++) {
-					for (int z = -1; z <= 1; z++) {
-						if (x == 0 && y == 0 && z == 0) continue;
-						BlockPos leafPos = logPos.offset(x, y, z);
-						queue.offer(new LeafSearchNode(leafPos, 1));
+		Set<BlockPos> logBlocks = treeStructure.logBlocks();
+		BlockState correctLeafType = initializeLeafSearch(logBlocks, level, queue);
+		if (correctLeafType == null) return leaves;
+
+		processLeafQueue(queue, processed, leaves, level, correctLeafType);
+
+		return leaves;
+	}
+
+	private BlockState initializeLeafSearch(Set<BlockPos> logBlocks, LevelAccessor level, Queue<LeafSearchNode> queue) {
+		BlockState correctLeafType = null;
+
+		for (BlockPos logPos : logBlocks) {
+			for (Direction dir : DIRECTIONS) {
+				BlockPos leafPos = logPos.relative(dir);
+				BlockState state = level.getBlockState(leafPos);
+
+				if (extraRequiredBlockCheck(state)) {
+					queue.offer(new LeafSearchNode(leafPos, 1));
+					if (correctLeafType == null) {
+						correctLeafType = state;
 					}
 				}
 			}
 		}
 
+		return correctLeafType;
+	}
+
+	private void processLeafQueue(Queue<LeafSearchNode> queue, Set<BlockPos> processed,
+								  Set<BlockPos> leaves, LevelAccessor level, BlockState correctLeafType) {
 		while (!queue.isEmpty()) {
 			LeafSearchNode node = queue.poll();
 			BlockPos pos = node.pos();
 			int distance = node.distance();
 
-			if (distance > FallingTreesConfig.getCommonConfig().limitations.maxLeavesDistance ||
-					processed.contains(pos)) {
-				continue;
-			}
-
+			if (!canProcessLeafNode(node, processed)) continue;
 			processed.add(pos);
-			BlockState state = level.getBlockState(pos);
 
-			if (isValidLeaf(state, distance)) {
+			if (isValidLeaf(level.getBlockState(pos), distance, correctLeafType)) {
 				leaves.add(pos);
-
-				for (int x = -1; x <= 1; x++) {
-					for (int y = -1; y <= 1; y++) {
-						for (int z = -1; z <= 1; z++) {
-							if (x == 0 && y == 0 && z == 0) continue;
-							BlockPos nextPos = pos.offset(x, y, z);
-							queue.offer(new LeafSearchNode(nextPos, distance + 1));
-						}
-					}
-				}
+				addNeighborLeaves(pos, distance, queue, processed, level, correctLeafType);
 			}
 		}
-
-		return leaves;
 	}
 
-	private boolean isValidLeaf(BlockState state, int distance) {
-		if (!extraRequiredBlockCheck(state)) {
-			return false;
-		}
+	private boolean canProcessLeafNode(LeafSearchNode node, Set<BlockPos> processed) {
+		return !processed.contains(node.pos()) &&
+				node.distance() <= FallingTreesConfig.getCommonConfig().limitations.maxLeavesDistance;
+	}
+
+	private boolean isValidLeaf(BlockState state, int distance, BlockState correctLeafType) {
+		if (state.getBlock() != correctLeafType.getBlock()) return false;
 
 		if (state.hasProperty(BlockStateProperties.DISTANCE)) {
 			int leafDistance = state.getValue(BlockStateProperties.DISTANCE);
@@ -241,8 +267,20 @@ public class DefaultTree implements TreeType {
 		return true;
 	}
 
-	private boolean isMatchingLog(BlockState state, BlockState initialState) {
-		return baseBlockCheck(state) && state.getBlock() == initialState.getBlock();
+	private void addNeighborLeaves(BlockPos pos, int distance, Queue<LeafSearchNode> queue,
+								   Set<BlockPos> processed, LevelAccessor level, BlockState correctLeafType) {
+		int nextDistance = distance + 1;
+		if (nextDistance > FallingTreesConfig.getCommonConfig().limitations.maxLeavesDistance) return;
+
+		for (Direction dir : DIRECTIONS) {
+			BlockPos nextPos = pos.relative(dir);
+			if (processed.contains(nextPos)) continue;
+
+			BlockState nextState = level.getBlockState(nextPos);
+			if (extraRequiredBlockCheck(nextState) && nextState.getBlock() == correctLeafType.getBlock()) {
+				queue.offer(new LeafSearchNode(nextPos, nextDistance));
+			}
+		}
 	}
 
 	@Override
