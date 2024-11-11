@@ -92,5 +92,15 @@
 	"text.autoconfig.efallingtrees_common.category.features": "Features",
 	"text.autoconfig.efallingtrees_common.option.features.disableCactusTrees": "Disable Cactus trees",
 	"text.autoconfig.efallingtrees_common.option.features.disableBambooTrees": "Disable Bamboo trees",
-	"text.autoconfig.efallingtrees_common.option.features.disableChorusTrees": "Disable Chorus trees"
+	"text.autoconfig.efallingtrees_common.option.features.disableChorusTrees": "Disable Chorus trees",
+
+	"text.autoconfig.efallingtrees_common.category.tree_breaking": "Tree Breaking Speed",
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification": "Enable Breaking Speed Modification",
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification.@Tooltip": "Enable or disable the modification of tree breaking speed",
+
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier": "No Axe Speed (%)",
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier.@Tooltip": "(% of default speed)",
+
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier": "Axe Speed (%)",
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier.@Tooltip": "(% of tool speed)"
 }

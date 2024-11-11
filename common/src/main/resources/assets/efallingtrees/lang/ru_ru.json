@@ -2,7 +2,7 @@
   "config.efallingtrees.title": "Настройки Enhanced Falling Trees",
   "config.efallingtrees.client": "Клиент",
   "config.efallingtrees.common": "Общие",
-  "config.efallingtrees.common.tooltip": "Нельзя изменять в игре",
+  "config.efallingtrees.common.@Tooltip": "Нельзя изменять в игре",
 
   "text.autoconfig.efallingtrees_client.title": "Настройки Enhanced Falling Trees",
 
@@ -91,5 +91,15 @@
   "text.autoconfig.efallingtrees_common.category.features": "Дополнительно",
   "text.autoconfig.efallingtrees_common.option.features.disableCactusTrees": "Отключить падение кактусов",
   "text.autoconfig.efallingtrees_common.option.features.disableBambooTrees": "Отключить падение бамбука",
-  "text.autoconfig.efallingtrees_common.option.features.disableChorusTrees": "Отключить падение хоруса"
+  "text.autoconfig.efallingtrees_common.option.features.disableChorusTrees": "Отключить падение хоруса",
+
+  "text.autoconfig.efallingtrees_common.category.tree_breaking": "Скорость ломания деревьев",
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification": "Включить изменение скорости ломания",
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification.@Tooltip": "Включить или выключить изменение скорости ломания деревьев",
+
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier": "Скорость без топора (%)",
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier.@Tooltip": "(% от обычной скорости)",
+
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier": "Скорость с топором (%)",
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier.@Tooltip": "(% от скорости самого топора)"
 }
