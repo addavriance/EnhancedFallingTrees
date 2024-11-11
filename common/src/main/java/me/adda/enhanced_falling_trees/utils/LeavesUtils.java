@@ -4,6 +4,7 @@ import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -27,10 +28,14 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class LeavesUtils {
-
     private static final Minecraft client = Minecraft.getInstance();
+    private static final float MIN_LIGHT_LEVEL = 0.3f;
 
     public static void trySpawnLeafParticle(Level world, Vec3 pos, BlockState leavesState, BlockPos leavesPos, RandomSource random) {
+        if (leavesState == null || leavesPos == null) return;
+
+        SimpleParticleType simpleParticle = ParticleRegistry.LEAVES.get();
+        if (simpleParticle == null) return;
 
         double x = pos.x + random.nextDouble();
         double y = pos.y - (random.nextDouble() / 3);
@@ -40,69 +45,98 @@ public class LeavesUtils {
         double yV = random.nextFloat() * 0.1D;
         double zV = random.nextGaussian() * 0.03D;
 
-        SimpleParticleType simpleParticle = ParticleRegistry.LEAVES.get();
-
         Particle particle = client.particleEngine.createParticle(simpleParticle, x, y, z, xV, yV, zV);
+        if (particle == null) return;
 
-        int leafColor;
-
-        try {
-            leafColor = client.getBlockColors().getColor(leavesState, world, leavesPos, 0);
-        } catch (Exception e) {
-            leafColor = leavesState.getMapColor(world, leavesPos).col;
-        }
+        int leafColor = getLeafColor(world, leavesState, leavesPos);
 
         BakedModel model = client.getModelManager().getBlockModelShaper().getBlockModel(leavesState);
-
         List<BakedQuad> quads = model.getQuads(leavesState, Direction.DOWN, random);
-
         TextureAtlasSprite sprite = quads.isEmpty() ? model.getParticleIcon() : quads.get(0).getSprite();
-
         boolean shouldColor = quads.isEmpty() || quads.stream().anyMatch(BakedQuad::isTinted);
 
         ResourceLocation texture = spriteToTexture(sprite);
+        double[] leaves_rgb = calculateLeafColor(texture, shouldColor, leafColor);
 
-        double[] leaves_rgb = calculateLeafColor(texture, shouldColor, leafColor, client);
+        float lightLevel = calculateLightLevel((ClientLevel) world);
 
-        float red = (float) leaves_rgb[0];
-        float green = (float) leaves_rgb[1];
-        float blue = (float) leaves_rgb[2];
+        float red = (float) leaves_rgb[0] * lightLevel;
+        float green = (float) leaves_rgb[1] * lightLevel;
+        float blue = (float) leaves_rgb[2] * lightLevel;
 
-        if (particle != null)
-            particle.setColor(red, green, blue);
+        particle.setColor(red, green, blue);
     }
 
-    private static double[] calculateLeafColor(ResourceLocation texture, boolean shouldColor, int blockColor, Minecraft client) {
-        Resource res = client.getResourceManager().getResource(texture).orElse(null);
+    private static int getLeafColor(Level world, BlockState leavesState, BlockPos leavesPos) {
+        try {
+            return client.getBlockColors().getColor(leavesState, world, leavesPos, 0);
+        } catch (Exception e) {
+            return leavesState.getMapColor(world, leavesPos).col;
+        }
+    }
 
-        if (res != null) {
+    private static float calculateLightLevel(ClientLevel level) {
+        long timeOfDay = level.getDayTime() % 24000;
 
-            String resourcePack = res.sourcePackId();
-            TextureCache.Data cache = TextureCache.INST.get(texture);
+        final long NOON = 6000;
+        final long SUNSET = 12000;
+        final long NIGHT = 13000;
+        final long SUNRISE = 23000;
 
-            double[] textureColor;
+        float lightLevel;
 
-            if (cache != null && resourcePack.equals(cache.resourcePack)) {
-                textureColor = cache.getColor();
+        if (timeOfDay >= NOON && timeOfDay < SUNSET) {
+            lightLevel = 1.0f;
+        } else if (timeOfDay >= SUNSET && timeOfDay < NIGHT) {
+            float progress = (float)(timeOfDay - SUNSET) / (NIGHT - SUNSET);
+            lightLevel = 1.0f - (progress * 0.5f);
+        } else if (timeOfDay >= NIGHT && timeOfDay < SUNRISE) {
+            lightLevel = 0.5f;
+        } else {
+            float progress;
+            if (timeOfDay >= SUNRISE) {
+                progress = (float)(timeOfDay - SUNRISE) / (24000 - SUNRISE);
             } else {
-                try (InputStream is = res.open()) {
-                    textureColor = averageColor(ImageIO.read(is));
-                    TextureCache.INST.put(texture, new TextureCache.Data(textureColor, resourcePack));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                progress = (float)(timeOfDay + (24000 - SUNRISE)) / (24000 - SUNRISE);
             }
-
-            if (shouldColor && blockColor != -1) {
-                textureColor[0] *= (blockColor >> 16 & 255) / 255.0;
-                textureColor[1] *= (blockColor >> 8 & 255) / 255.0;
-                textureColor[2] *= (blockColor & 255) / 255.0;
-            }
-
-            return textureColor;
+            lightLevel = 0.5f + (progress * 0.5f);
         }
 
-        return new double[] {1, 1, 1};
+        float rainLevel = level.getRainLevel(client.getFrameTime());
+        float thunderLevel = level.getThunderLevel(client.getFrameTime());
+
+        lightLevel *= (1.0F - rainLevel * 0.4F);
+        lightLevel *= (1.0F - thunderLevel * 0.4F);
+
+        return Math.max(MIN_LIGHT_LEVEL, lightLevel);
+    }
+
+    private static double[] calculateLeafColor(ResourceLocation texture, boolean shouldColor, int blockColor) {
+        Resource res = client.getResourceManager().getResource(texture).orElse(null);
+        if (res == null) return new double[] {1, 1, 1};
+
+        String resourcePack = res.sourcePackId();
+        TextureCache.Data cache = TextureCache.INST.get(texture);
+        double[] textureColor;
+
+        if (cache != null && resourcePack.equals(cache.resourcePack)) {
+            textureColor = cache.getColor();
+        } else {
+            try (InputStream is = res.open()) {
+                textureColor = averageColor(ImageIO.read(is));
+                TextureCache.INST.put(texture, new TextureCache.Data(textureColor, resourcePack));
+            } catch (IOException e) {
+                return new double[] {1, 1, 1};
+            }
+        }
+
+        if (shouldColor && blockColor != -1) {
+            textureColor[0] *= (blockColor >> 16 & 255) / 255.0;
+            textureColor[1] *= (blockColor >> 8 & 255) / 255.0;
+            textureColor[2] *= (blockColor & 255) / 255.0;
+        }
+
+        return textureColor;
     }
 
     public static double[] averageColor(BufferedImage image) {
@@ -114,7 +148,6 @@ public class LeavesUtils {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 Color c = new Color(image.getRGB(x, y), true);
-
                 if (c.getAlpha() == 255) {
                     r += c.getRed();
                     g += c.getGreen();
@@ -135,5 +168,4 @@ public class LeavesUtils {
         String texture = sprite.contents().name().getPath();
         return new ResourceLocation(sprite.contents().name().getNamespace(), "textures/" + texture + ".png");
     }
-
 }

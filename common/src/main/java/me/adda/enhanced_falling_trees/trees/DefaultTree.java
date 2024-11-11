@@ -2,17 +2,12 @@ package me.adda.enhanced_falling_trees.trees;
 
 import dev.architectury.platform.Platform;
 import me.adda.enhanced_falling_trees.api.TreeType;
+import me.adda.enhanced_falling_trees.client.TreeEffects;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
-import me.adda.enhanced_falling_trees.registry.SoundRegistry;
 import me.adda.enhanced_falling_trees.utils.GroundUtils;
-import me.adda.enhanced_falling_trees.utils.LeavesUtils;
 import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
@@ -21,12 +16,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class DefaultTree implements TreeType {
+	private static final int MAX_TREE_HEIGHT = 32;
+
+	public record TreeStructure(Set<BlockPos> logBlocks, Set<BlockPos> mainTrunk) {}
+	public record LeafSearchNode(BlockPos pos, int distance) {}
+	public record SearchNode(BlockPos pos, int verticalDistance) {}
 
 	@Override
 	public boolean baseBlockCheck(BlockState blockState) {
@@ -46,110 +43,206 @@ public class DefaultTree implements TreeType {
 	}
 
 	@Override
-	public void entityTick(TreeEntity entity) {
-		TreeType.super.entityTick(entity);
+	public void handleSpecialEffects(TreeEntity entity) {
+		if (entity == null ) return;
 
 		if (Platform.getEnv() == EnvType.CLIENT) {
 			if (entity.tickCount == 1) {
-				if (FallingTreesConfig.getClientConfig().soundSettings.enabled) {
-					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundRegistry.TREE_FALL.get(),
-							SoundSource.BLOCKS, FallingTreesConfig.getClientConfig().soundSettings.startVolume, 1f, true);
-				}
+				TreeEffects.playTreeFallSound(entity);
 			}
 
 			if (entity.tickCount == (int) (this.getFallAnimLength() * 20) - 5) {
-				SoundEvent sound = GroundUtils.willBeInLiquid(entity) ? SoundEvents.PLAYER_SPLASH : SoundRegistry.TREE_IMPACT.get();
-				if (FallingTreesConfig.getClientConfig().soundSettings.enabled) {
-					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), sound,
-							SoundSource.BLOCKS, FallingTreesConfig.getClientConfig().soundSettings.endVolume, 1f, true);
-				}
+				TreeEffects.playTreeImpactSound(entity);
 			}
+		}
 
-			if (entity.tickCount == entity.getMaxLifeTimeTick() && !entity.getLeavesDropped()) {
-				entity.setLeavesDropped();
+		if (entity.tickCount == (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
+			handleParticles(entity);
+		}
+	}
 
-				BlockState leavesState = entity.getBlocks().values().stream()
-						.filter(this::extraRequiredBlockCheck)
-						.findFirst()
-						.orElse(null);
+	private void handleParticles(TreeEntity entity) {
+		BlockState leavesState = getParticleBlockState(entity);
+		if (leavesState == null) return;
 
-				BlockPos leavesPos = entity.getBlocks().entrySet().stream()
-						.filter(entry -> Objects.equals(entry.getValue(), leavesState))
-						.map(Map.Entry::getKey)
-						.findFirst().orElse(null);
+		BlockPos leavesPos = getParticleBlockPos(entity);
+		if (leavesPos == null) return;
 
-				Vec3[] lineBlocks = GroundUtils.getFallBlockLine(entity);
+		Vec3[] lineBlocks = GroundUtils.getFallBlockLine(entity);
 
-				int particleCount = FallingTreesConfig.getCommonConfig().leafParticleCount;
-
-				for (Vec3 lineBlock : lineBlocks) {
-					for (int i = 0; i < particleCount; i++)
-						LeavesUtils.trySpawnLeafParticle(entity.level(), lineBlock, leavesState, leavesPos, entity.level().getRandom());
-				}
-
-			}
+		if (Platform.getEnv() == EnvType.CLIENT && entity.level().isClientSide) {
+			TreeEffects.spawnLeafParticles(lineBlocks, leavesState, leavesPos, entity.level());
 		}
 	}
 
 	@Override
-	public Set<BlockPos> blockGatheringAlgorithm(BlockPos blockPos, LevelAccessor level) {
-		Set<BlockPos> blocks = new HashSet<>();
+	public boolean supportsParticles() {
+		return true;
+	}
 
+	@Override
+	public BlockState getParticleBlockState(TreeEntity entity) {
+		return entity.getBlocks().values().stream()
+				.filter(this::extraRequiredBlockCheck)
+				.findFirst()
+				.orElse(null);
+	}
+
+	@Override
+	public BlockPos getParticleBlockPos(TreeEntity entity) {
+		BlockState leavesState = getParticleBlockState(entity);
+		if (leavesState == null) return null;
+
+		return entity.getBlocks().entrySet().stream()
+				.filter(entry -> entry.getValue().equals(leavesState))
+				.map(Map.Entry::getKey)
+				.findFirst()
+				.orElse(null);
+	}
+
+	@Override
+	public Set<BlockPos> blockGatheringAlgorithm(BlockPos startPos, LevelAccessor level) {
+		Set<BlockPos> allBlocks = new HashSet<>();
+		BlockState initialState = level.getBlockState(startPos);
+
+		TreeStructure treeStructure = gatherTreeStructure(startPos, level, initialState);
+		allBlocks.addAll(treeStructure.logBlocks());
+
+		Set<BlockPos> leaves = gatherLeaves(treeStructure, level);
+		allBlocks.addAll(leaves);
+
+		return allBlocks;
+	}
+
+	private TreeStructure gatherTreeStructure(BlockPos startPos, LevelAccessor level, BlockState initialState) {
 		Set<BlockPos> logBlocks = new HashSet<>();
-		Set<BlockPos> loopedLogBlocks = new HashSet<>();
+		Set<BlockPos> mainTrunk = new HashSet<>();
+		Set<BlockPos> processed = new HashSet<>();
+		Queue<SearchNode> toProcess = new LinkedList<>();
 
-		Set<BlockPos> leavesBlocks = new HashSet<>();
+		toProcess.offer(new SearchNode(startPos, 0));
+		processed.add(startPos);
 
-		loopLogs(level, blockPos, blockPos, logBlocks, loopedLogBlocks, leavesBlocks, 0);
+		while (!toProcess.isEmpty()) {
+			SearchNode current = toProcess.poll();
+			BlockPos currentPos = current.pos;
+			int verticalDistance = current.verticalDistance;
 
-		blocks.addAll(logBlocks);
-		blocks.addAll(leavesBlocks);
-		return blocks;
-	}
+			boolean isMainTrunk = currentPos.getX() == startPos.getX() && currentPos.getZ() == startPos.getZ();
 
-	public void loopLogs(LevelAccessor level, BlockPos originPos, BlockPos initialPos, Set<BlockPos> logBlocks, Set<BlockPos> loopedLogBlocks, Set<BlockPos> leavesBlocks, int distance) {
-		if (loopedLogBlocks.contains(originPos)) return;
+			if (isMatchingLog(level.getBlockState(currentPos), initialState)) {
+				logBlocks.add(currentPos);
+				if (isMainTrunk) {
+					mainTrunk.add(currentPos);
+				}
 
-		boolean isMovingUp = originPos.getY() > initialPos.getY();
-		if (!isMovingUp && distance > FallingTreesConfig.getCommonConfig().limitations.maxTreeDistance) return;
+				for (int x = -1; x <= 1; x++) {
+					for (int y = -1; y <= 1; y++) {
+						for (int z = -1; z <= 1; z++) {
+							if (x == 0 && y == 0 && z == 0) continue;
 
-		loopedLogBlocks.add(originPos);
+							BlockPos neighborPos = currentPos.offset(x, y, z);
 
-		BlockState blockState = level.getBlockState(originPos);
-		if (this.baseBlockCheck(blockState) && blockState.getBlock() == level.getBlockState(initialPos).getBlock()) {
-			logBlocks.add(originPos);
+							if (neighborPos.getY() < startPos.getY()) continue;
 
-			for (BlockPos offset : BlockPos.betweenClosed(new BlockPos(-1, 0, -1), new BlockPos(1, 1, 1))) {
-				BlockPos neighborPos = originPos.offset(offset);
-				loopLogs(level, neighborPos, initialPos, logBlocks, loopedLogBlocks, leavesBlocks, isMovingUp ? distance : distance + 1);
-			}
+							int newVerticalDistance = verticalDistance;
+							if (y < 0) continue;
+							else if (y > 0) newVerticalDistance++;
 
-			Set<BlockPos> loopedLeavesBlocks = new HashSet<>();
+							if (!processed.contains(neighborPos) &&
+									isWithinDistance(neighborPos, currentPos, startPos,
+											FallingTreesConfig.getCommonConfig().limitations.maxTreeDistance,
+											newVerticalDistance)) {
 
-			for (Direction direction : Direction.values()) {
-				BlockPos neighborPos = originPos.offset(direction.getNormal());
-				loopLeaves(level, neighborPos, initialPos, 1, leavesBlocks, loopedLeavesBlocks, distance + 1);
-			}
-		}
-	}
-
-	public void loopLeaves(LevelAccessor level, BlockPos originPos, BlockPos initialPos, int distance, Set<BlockPos> leavesBlocks, Set<BlockPos> loopedLeavesBlocks, int treeDistance) {
-		BlockState blockState = level.getBlockState(originPos);
-		if ((blockState.hasProperty(BlockStateProperties.DISTANCE) && blockState.getValue(BlockStateProperties.DISTANCE) != distance) ||
-				distance >= 7 || loopedLeavesBlocks.contains(originPos))
-			return;
-
-		loopedLeavesBlocks.add(originPos);
-
-		if (this.extraRequiredBlockCheck(blockState)) {
-			leavesBlocks.add(originPos);
-
-			for (Direction direction : Direction.values()) {
-				BlockPos neighborPos = originPos.offset(direction.getNormal());
-				if (distance < FallingTreesConfig.getCommonConfig().limitations.maxLeavesDistance)
-					loopLeaves(level, neighborPos, initialPos, distance + 1, leavesBlocks, loopedLeavesBlocks, treeDistance + 1);
+								processed.add(neighborPos);
+								toProcess.offer(new SearchNode(neighborPos, newVerticalDistance));
+							}
+						}
+					}
+				}
 			}
 		}
+
+		return new TreeStructure(logBlocks, mainTrunk);
+	}
+
+	private boolean isWithinDistance(BlockPos pos, BlockPos currentPos, BlockPos startPos,
+									 int maxDistance, int verticalDistance) {
+		if (pos.getX() == startPos.getX() && pos.getZ() == startPos.getZ()) {
+			return verticalDistance <= MAX_TREE_HEIGHT;
+		}
+
+		int horizontalDistance = Math.max(
+				Math.abs(pos.getX() - currentPos.getX()),
+				Math.abs(pos.getZ() - currentPos.getZ())
+		);
+
+		return horizontalDistance <= maxDistance && verticalDistance <= MAX_TREE_HEIGHT;
+	}
+
+	private Set<BlockPos> gatherLeaves(TreeStructure treeStructure, LevelAccessor level) {
+		Set<BlockPos> leaves = new HashSet<>();
+		Set<BlockPos> processed = new HashSet<>();
+		Queue<LeafSearchNode> queue = new LinkedList<>();
+
+		for (BlockPos logPos : treeStructure.logBlocks()) {
+			for (int x = -1; x <= 1; x++) {
+				for (int y = -1; y <= 1; y++) {
+					for (int z = -1; z <= 1; z++) {
+						if (x == 0 && y == 0 && z == 0) continue;
+						BlockPos leafPos = logPos.offset(x, y, z);
+						queue.offer(new LeafSearchNode(leafPos, 1));
+					}
+				}
+			}
+		}
+
+		while (!queue.isEmpty()) {
+			LeafSearchNode node = queue.poll();
+			BlockPos pos = node.pos();
+			int distance = node.distance();
+
+			if (distance > FallingTreesConfig.getCommonConfig().limitations.maxLeavesDistance ||
+					processed.contains(pos)) {
+				continue;
+			}
+
+			processed.add(pos);
+			BlockState state = level.getBlockState(pos);
+
+			if (isValidLeaf(state, distance)) {
+				leaves.add(pos);
+
+				for (int x = -1; x <= 1; x++) {
+					for (int y = -1; y <= 1; y++) {
+						for (int z = -1; z <= 1; z++) {
+							if (x == 0 && y == 0 && z == 0) continue;
+							BlockPos nextPos = pos.offset(x, y, z);
+							queue.offer(new LeafSearchNode(nextPos, distance + 1));
+						}
+					}
+				}
+			}
+		}
+
+		return leaves;
+	}
+
+	private boolean isValidLeaf(BlockState state, int distance) {
+		if (!extraRequiredBlockCheck(state)) {
+			return false;
+		}
+
+		if (state.hasProperty(BlockStateProperties.DISTANCE)) {
+			int leafDistance = state.getValue(BlockStateProperties.DISTANCE);
+			return leafDistance >= distance;
+		}
+
+		return true;
+	}
+
+	private boolean isMatchingLog(BlockState state, BlockState initialState) {
+		return baseBlockCheck(state) && state.getBlock() == initialState.getBlock();
 	}
 
 	@Override

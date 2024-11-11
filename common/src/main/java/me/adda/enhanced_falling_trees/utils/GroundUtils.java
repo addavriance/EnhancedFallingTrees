@@ -33,6 +33,7 @@ public class GroundUtils {
                     groundIndex = j;
                 }
             }
+
             if (groundIndex == 0)
                 for (int k = 1; k <= treeHeight; k++) {
                     BlockPos checkPos = blockPos.above().below(k);
@@ -182,7 +183,7 @@ public class GroundUtils {
                 }
             }
 
-            if(negativeCount > totalElements / 2) {
+            if (negativeCount > totalElements / 2) {
                 groundIndexes = GroundUtils.translateGroundIndexes(groundIndexes);
 
                 for (Integer index : groundIndexes) {
@@ -190,7 +191,6 @@ public class GroundUtils {
                 }
 
                 max_index = Arrays.asList(groundIndexes).indexOf(max);
-
 
                 angle = 90 + (float) Math.toDegrees(java.lang.Math.atan((double) max_index / max));
             } else {
