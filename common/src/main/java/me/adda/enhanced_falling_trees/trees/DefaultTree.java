@@ -189,8 +189,8 @@ public class DefaultTree implements TreeType {
 		}
 
 		int horizontalDistance = Math.max(
-				Math.abs(pos.getX() - currentPos.getX()),
-				Math.abs(pos.getZ() - currentPos.getZ())
+				Math.abs(startPos.getX() - currentPos.getX()),
+				Math.abs(startPos.getZ() - currentPos.getZ())
 		);
 
 		return horizontalDistance <= maxDistance && verticalDistance <= MAX_TREE_HEIGHT;
