@@ -1,4 +1,3 @@
-// FallingTreesFabricClient.java
 package me.adda.enhanced_falling_trees.fabric;
 
 import dev.architectury.registry.client.particle.ParticleProviderRegistry;
