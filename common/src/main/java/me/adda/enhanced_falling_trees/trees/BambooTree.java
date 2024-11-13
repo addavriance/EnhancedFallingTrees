@@ -44,40 +44,49 @@ public class BambooTree implements TreeType {
 	}
 
 	@Override
-	public void entityTick(TreeEntity entity) {
-		TreeType.super.entityTick(entity);
+	public void handleSpecialEffects(TreeEntity entity) {
+		if (entity == null) return;
 
 		if (Platform.getEnv() == EnvType.CLIENT) {
 			if (entity.tickCount == 1) {
 				if (FallingTreesConfig.getClientConfig().soundSettings.enabled) {
-					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundRegistry.BAMBOO_FALL.get(),
-							SoundSource.BLOCKS, FallingTreesConfig.getClientConfig().soundSettings.startVolume, 1f, true);
+					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(),
+							SoundRegistry.BAMBOO_FALL.get(),
+							SoundSource.BLOCKS,
+							FallingTreesConfig.getClientConfig().soundSettings.startVolume,
+							1f, true);
 				}
 			}
 
 			if (entity.tickCount == (int) (this.getFallAnimLength() * 20) - 5) {
-				SoundEvent sound = GroundUtils.willBeInLiquid(entity) ? SoundEvents.GENERIC_SPLASH : SoundRegistry.BAMBOO_IMPACT.get();
+				SoundEvent sound = GroundUtils.willBeInLiquid(entity) ?
+						SoundEvents.GENERIC_SPLASH : SoundRegistry.BAMBOO_IMPACT.get();
+
 				if (FallingTreesConfig.getClientConfig().soundSettings.enabled) {
-					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), sound,
-							SoundSource.BLOCKS, FallingTreesConfig.getClientConfig().soundSettings.endVolume, 1f, true);
+					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(),
+							sound,
+							SoundSource.BLOCKS,
+							FallingTreesConfig.getClientConfig().soundSettings.endVolume,
+							1f, true);
 				}
 			}
-
 		}
 	}
-
 	@Override
 	public boolean enabled() {
 		return !FallingTreesConfig.getCommonConfig().features.disableBambooTrees;
 	}
+
 	@Override
 	public float getFallAnimLength() {
 		return FallingTreesConfig.getClientConfig().animation.bambooProperties.fallAnimLength;
 	}
+
 	@Override
 	public float getBounceAngleHeight() {
 		return FallingTreesConfig.getClientConfig().animation.bambooProperties.bounceAngleHeight;
 	}
+
 	@Override
 	public float getBounceAnimLength() {
 		return FallingTreesConfig.getClientConfig().animation.bambooProperties.bounceAnimLength;
