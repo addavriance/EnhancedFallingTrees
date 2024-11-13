@@ -69,38 +69,38 @@
 	"text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.maxAmountType": "Max Amount type",
 	"text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.maxAmount": "Max amount",
 	"text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.minTreeHeight": "Min tree height",
-	"text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.onlyRequiredTool": "Only fall when required tool is used",
+	"text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.onlyRequiredTool": "Tool required",
 
 	"text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements": "Bamboo Fall Requirements",
 	"text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.maxAmountType": "Max Amount type",
 	"text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.maxAmount": "Max amount",
 	"text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.minTreeHeight": "Min bamboo height",
-	"text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.onlyRequiredTool": "Only fall when required tool is used",
+	"text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.onlyRequiredTool": "Tool required",
 
 	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements": "Chorus fall requirements",
 	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.maxAmountType": "Max amount type",
 	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.maxAmount": "Max amount",
 	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.minTreeHeight": "Min chorus height",
-	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.onlyRequiredTool": "Only fall when required tool is used",
+	"text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.onlyRequiredTool": "Tool required",
 
 	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements": "Cactus fall requirements",
 	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.maxAmountType": "Max amount type",
 	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.maxAmount": "Max amount",
 	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.minTreeHeight": "Min cactus height",
-	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.onlyRequiredTool": "Only fall when required tool is used",
+	"text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.onlyRequiredTool": "Tool required",
 
 	"text.autoconfig.efallingtrees_common.category.features": "Features",
 	"text.autoconfig.efallingtrees_common.option.features.disableCactusTrees": "Disable Cactus trees",
 	"text.autoconfig.efallingtrees_common.option.features.disableBambooTrees": "Disable Bamboo trees",
 	"text.autoconfig.efallingtrees_common.option.features.disableChorusTrees": "Disable Chorus trees",
 
-	"text.autoconfig.efallingtrees_common.category.tree_breaking": "Tree Breaking Speed",
+	"text.autoconfig.efallingtrees_common.category.tree_breaking": "Tree Breaking",
 	"text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification": "Enable Breaking Speed Modification",
 	"text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification.@Tooltip": "Enable or disable the modification of tree breaking speed",
 
-	"text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier": "No Axe Speed (%)",
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier": "No Tool Speed (%)",
 	"text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier.@Tooltip": "(% of default speed)",
 
-	"text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier": "Axe Speed (%)",
-	"text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier.@Tooltip": "(% of tool speed)"
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier": "Tool Speed (%)",
+	"text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier.@Tooltip": "(% of default tool speed)"
 }
