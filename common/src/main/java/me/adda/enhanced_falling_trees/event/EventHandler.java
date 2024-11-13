@@ -91,7 +91,7 @@ public class EventHandler {
 			if (!mainItem.isEmpty() && treeType.allowedTool(mainItem)) {
 				mainItem.hurtAndBreak(commonConfig.multiplyToolDamage ? (int) baseAmount : 1, player, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
 			} else {
-				player.causeFoodExhaustion(2F * (commonConfig.multiplyFoodExhaustion ? (int) baseAmount : 1));
+				player.causeFoodExhaustion(2F * (commonConfig.multiplyFoodExhaustion ? treeBlockPos.toArray().length : 1));
 			}
 		else
 			if (!mainItem.isEmpty() && treeType.allowedTool(mainItem)) {

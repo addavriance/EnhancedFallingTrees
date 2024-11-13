@@ -68,28 +68,38 @@
   "text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.maxAmountType": "Тип максимального количества",
   "text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.maxAmount": "Максимальное количество",
   "text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.minTreeHeight": "Минимальная высота дерева",
-  "text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.onlyRequiredTool": "Падение только с нужным инструментом",
+  "text.autoconfig.efallingtrees_common.option.limitations.treeFallRequirements.onlyRequiredTool": "Нужен инструмент",
 
   "text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements": "Требования для падения бамбука",
   "text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.maxAmountType": "Тип максимального количества",
   "text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.maxAmount": "Максимальное количество",
   "text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.minTreeHeight": "Минимальная высота бамбука",
-  "text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.onlyRequiredTool": "Падение только с нужным инструментом",
+  "text.autoconfig.efallingtrees_common.option.limitations.bambooFallRequirements.onlyRequiredTool": "Нужен инструмент",
 
   "text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements": "Требования для падения хоруса",
   "text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.maxAmountType": "Тип максимального количества",
   "text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.maxAmount": "Максимальное количество",
   "text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.minTreeHeight": "Минимальная высота хоруса",
-  "text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.onlyRequiredTool": "Падение только с нужным инструментом",
+  "text.autoconfig.efallingtrees_common.option.limitations.chorusFallRequirements.onlyRequiredTool": "Нужен инструмент",
 
   "text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements": "Требования для падения кактуса",
   "text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.maxAmountType": "Тип максимального количества",
   "text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.maxAmount": "Максимальное количество",
   "text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.minTreeHeight": "Минимальная высота кактуса",
-  "text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.onlyRequiredTool": "Падение только с нужным инструментом",
+  "text.autoconfig.efallingtrees_common.option.limitations.cactusFallRequirements.onlyRequiredTool": "Нужен инструмент",
 
   "text.autoconfig.efallingtrees_common.category.features": "Дополнительно",
   "text.autoconfig.efallingtrees_common.option.features.disableCactusTrees": "Отключить падение кактусов",
   "text.autoconfig.efallingtrees_common.option.features.disableBambooTrees": "Отключить падение бамбука",
-  "text.autoconfig.efallingtrees_common.option.features.disableChorusTrees": "Отключить падение хоруса"
+  "text.autoconfig.efallingtrees_common.option.features.disableChorusTrees": "Отключить падение хоруса",
+
+  "text.autoconfig.efallingtrees_common.category.tree_breaking": "Ломание деревьев",
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification": "Включить изменение скорости ломания",
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification.@Tooltip": "Включить или выключить изменение скорости ломания деревьев",
+
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier": "Скорость без инструмента (%)",
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.noAxeSpeedMultiplier.@Tooltip": "(% от обычной скорости)",
+
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier": "Скорость с инструментом (%)",
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier.@Tooltip": "(% от скорости инструмента)"
 }

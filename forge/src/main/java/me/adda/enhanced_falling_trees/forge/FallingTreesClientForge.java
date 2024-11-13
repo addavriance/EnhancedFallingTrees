@@ -1,10 +1,10 @@
 package me.adda.enhanced_falling_trees.forge;
 
-import dev.architectury.registry.client.particle.ParticleProviderRegistry;
 import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.config.screen.ConfigScreen;
 import me.adda.enhanced_falling_trees.particles.LeavesParticles;
 import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
@@ -23,6 +23,9 @@ public class FallingTreesClientForge {
 
 	@SubscribeEvent
 	public static void onParticleFactoryRegistration(RegisterParticleProvidersEvent event) {
-		ParticleProviderRegistry.register(ParticleRegistry.LEAVES.get(), LeavesParticles.Factory::new);
+		Minecraft.getInstance().particleEngine.register(
+				ParticleRegistry.LEAVES.get(),
+				LeavesParticles.Factory::new
+		);
 	}
 }

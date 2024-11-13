@@ -38,20 +38,37 @@ public interface TreeType {
 	}
 
 	default void entityTick(TreeEntity entity) {
-		int counter = 0;
+		handleDrops(entity);
+		handleSpecialEffects(entity);
+	}
 
-		Level level = entity.level();
-
+	default void handleDrops(TreeEntity entity) {
 		if (entity.tickCount >= entity.getMaxLifeTimeTick()) {
+			Level level = entity.level();
 			Vec3[] fallBlockLine = GroundUtils.getFallBlockLine(entity);
-			ItemStack usedItem = entity.getUsedTool();
+			int counter = 0;
+
 			for (Map.Entry<BlockPos, BlockState> entry : entity.getBlocks().entrySet()) {
 				if (shouldDropItems(entry.getValue())) {
 					BlockEntity blockEntity = null;
-					if (entry.getValue().hasBlockEntity())
+					if (entry.getValue().hasBlockEntity()) {
 						blockEntity = level.getBlockEntity(entry.getKey().offset(entity.getOriginPos()));
-					BlockPos pos = new BlockPos((int) fallBlockLine[counter].x, (int) fallBlockLine[counter].y, (int) fallBlockLine[counter].z);
-					Block.dropResources(entry.getValue(), level, pos, blockEntity, entity.owner, usedItem);
+					}
+
+					BlockPos pos = new BlockPos(
+							(int) fallBlockLine[counter].x,
+							(int) fallBlockLine[counter].y,
+							(int) fallBlockLine[counter].z
+					);
+
+					Block.dropResources(
+							entry.getValue(),
+							level,
+							pos,
+							blockEntity,
+							entity.owner,
+							entity.getUsedTool()
+					);
 
 					counter = counter == fallBlockLine.length - 1 ? 0 : counter + 1;
 				}
@@ -61,9 +78,13 @@ public interface TreeType {
 		}
 	}
 
+	default void handleSpecialEffects(TreeEntity entity) {
+
+	}
+
 	default boolean allowedToFall(Player player, LevelAccessor level, BlockPos blockPos, LimitationsConfig.FallRequirements fallRequirements) {
 		ItemStack mainItem = player.getItemBySlot(EquipmentSlot.MAINHAND);
-		if (fallRequirements.onlyRequiredTool && this.allowedTool(mainItem)) return false;
+		if (fallRequirements.onlyRequiredTool && !this.allowedTool(mainItem)) return false;
 
 		Set<BlockPos> treeBlockPos = this.blockGatheringAlgorithm(blockPos, level);
 		if (treeBlockPos.stream().noneMatch(blockPos1 -> this.extraRequiredBlockCheck(level.getBlockState(blockPos1)))) return false;
@@ -82,8 +103,9 @@ public interface TreeType {
 			}
 		}
 
-		return !(FallingTreesConfig.getCommonConfig().isCrouchMiningAllowed &&
-				player.isCrouching() != ConfigPacket.getClientConfig(player).getBoolean("invertCrouchMining"));
+		boolean invertCrouch = ConfigPacket.getClientConfig(player).getBoolean("invertCrouchMining");
+
+		return !player.isCrouching() || (invertCrouch != FallingTreesConfig.getCommonConfig().isCrouchMiningAllowed);
 	}
 
 	default boolean shouldDropItems(BlockState blockState) {
@@ -107,5 +129,17 @@ public interface TreeType {
 
 	default float getBounceAnimLength() {
 		return 0;
+	}
+
+	default boolean supportsParticles() {
+		return false;
+	}
+
+	default BlockState getParticleBlockState(TreeEntity entity) {
+		return null;
+	}
+
+	default BlockPos getParticleBlockPos(TreeEntity entity) {
+		return null;
 	}
 }
