@@ -70,14 +70,16 @@ public class DefaultTree implements TreeType {
 			if (entity.tickCount == (int) (this.getFallAnimLength() * 20) - 5) {
 				TreeEffects.playTreeImpactSound(entity);
 			}
-		}
 
-		if (entity.tickCount >= (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
-			handleParticles(entity);
+			if (entity.tickCount >= (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
+				handleParticles(entity);
+			}
 		}
 	}
 
 	private void handleParticles(TreeEntity entity) {
+		if (!(Platform.getEnv() == EnvType.CLIENT && entity.level().isClientSide)) return;
+
 		BlockState leavesState = getParticleBlockState(entity);
 		if (leavesState == null) return;
 
@@ -86,9 +88,7 @@ public class DefaultTree implements TreeType {
 
 		Vec3[] lineBlocks = GroundUtils.getFallBlockLine(entity);
 
-		if (Platform.getEnv() == EnvType.CLIENT && entity.level().isClientSide) {
-			TreeEffects.spawnLeafParticles(lineBlocks, leavesState, leavesPos, entity.level());
-		}
+		TreeEffects.spawnLeafParticles(lineBlocks, leavesState, leavesPos, entity.level());
 	}
 
 	@Override
