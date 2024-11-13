@@ -8,11 +8,19 @@ issueTrackerURL="https://github.com/addavriance/EnhancedFallingTrees/issues"
 	modId="efallingtrees"
 	version="${version}"
 	displayName="Enhanced Falling Trees"
+    displayURL="https://modrinth.com/mod/enhanced-falling-trees"
 	logoFile="icon.png"
 	authors="addavriance"
 	description='''
 		Enhanced Falling Trees is a mod that introduces realistic falling mechanics to trees, bamboos, and cacti, making your game more immersive with naturalistic plants behavior.
-	'''
+
+        Features:
+        - Realistic tree falling animations
+        - Support for bamboo and cacti
+        - Customizable settings
+        - Performance friendly
+        - Works with most tree-generating mods
+    '''
 
 [[dependencies.efallingtrees]]
    modId="forge"
