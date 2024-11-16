@@ -4,7 +4,6 @@ import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -29,7 +28,6 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class LeavesUtils {
     private static final Minecraft client = Minecraft.getInstance();
-    private static final float MIN_LIGHT_LEVEL = 0.3f;
 
     public static void trySpawnLeafParticle(Level world, Vec3 pos, BlockState leavesState, BlockPos leavesPos, RandomSource random) {
         if (leavesState == null || leavesPos == null) return;
@@ -58,11 +56,9 @@ public class LeavesUtils {
         ResourceLocation texture = spriteToTexture(sprite);
         double[] leaves_rgb = calculateLeafColor(texture, shouldColor, leafColor);
 
-        float lightLevel = calculateLightLevel((ClientLevel) world);
-
-        float red = (float) leaves_rgb[0] * lightLevel;
-        float green = (float) leaves_rgb[1] * lightLevel;
-        float blue = (float) leaves_rgb[2] * lightLevel;
+        float red = (float) leaves_rgb[0];
+        float green = (float) leaves_rgb[1];
+        float blue = (float) leaves_rgb[2];
 
         particle.setColor(red, green, blue);
     }
@@ -73,25 +69,6 @@ public class LeavesUtils {
         } catch (Exception e) {
             return leavesState.getMapColor(world, leavesPos).col;
         }
-    }
-
-    private static float calculateLightLevel(ClientLevel level) {
-        long time = level.getDayTime() % 24000;
-        float dayLight;
-
-        if (time < 12000) {
-            dayLight = 1.0f;
-        } else if (time < 13000) {
-            dayLight = 1.0f - (0.5f * (time - 12000) / 1000f);
-        } else if (time < 23000) {
-            dayLight = 0.5f;
-        } else {
-            dayLight = 0.5f + (0.5f * (time - 23000) / 1000f);
-        }
-
-        float weather = (1.0f - level.getRainLevel(0) * 0.2f) * (1.0f - level.getThunderLevel(0) * 0.2f);
-
-        return Math.max(MIN_LIGHT_LEVEL, dayLight * weather);
     }
 
     private static double[] calculateLeafColor(ResourceLocation texture, boolean shouldColor, int blockColor) {
