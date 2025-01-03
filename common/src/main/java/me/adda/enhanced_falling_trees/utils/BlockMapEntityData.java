@@ -6,8 +6,8 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BlockMapEntityData implements EntityDataSerializer<Map<BlockPos, BlockState>> {
 	public static final EntityDataSerializer<Map<BlockPos, BlockState>> BLOCK_MAP = new BlockMapEntityData();
@@ -24,6 +24,6 @@ public class BlockMapEntityData implements EntityDataSerializer<Map<BlockPos, Bl
 
 	@Override
 	public Map<BlockPos, BlockState> copy(Map<BlockPos, BlockState> value) {
-		return new HashMap<>(value);
+		return new ConcurrentHashMap<>(value);
 	}
 }
