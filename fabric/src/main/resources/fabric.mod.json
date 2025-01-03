@@ -22,6 +22,9 @@
 		],
 		"modmenu": [
 			"me.adda.enhanced_falling_trees.fabric.ModMenuIntegration"
+		],
+		"jade": [
+			"me.adda.enhanced_falling_trees.compat.Jade"
 		]
 	},
 	"mixins": [
