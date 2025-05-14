@@ -46,7 +46,10 @@ public interface TreeType {
 		if (entity.tickCount >= entity.getMaxLifeTimeTick()) {
 			Level level = entity.level();
 			Vec3[] fallBlockLine = GroundUtils.getFallBlockLine(entity);
+
 			int counter = 0;
+
+			boolean isLootDropOnSingleBlock = FallingTreesConfig.getCommonConfig().treeBreaking.isLootDropOnSingleBlock;
 
 			for (Map.Entry<BlockPos, BlockState> entry : entity.getBlocks().entrySet()) {
 				if (shouldDropItems(entry.getValue())) {
@@ -70,7 +73,7 @@ public interface TreeType {
 							entity.getUsedTool()
 					);
 
-					counter = counter == fallBlockLine.length - 1 ? 0 : counter + 1;
+					counter = (counter == fallBlockLine.length - 1 || isLootDropOnSingleBlock) ? 0 : counter + 1;
 				}
 			}
 

@@ -4,7 +4,7 @@ import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.config.common.FeaturesConfig;
 import me.adda.enhanced_falling_trees.config.common.FilterConfig;
 import me.adda.enhanced_falling_trees.config.common.LimitationsConfig;
-import me.adda.enhanced_falling_trees.config.common.TreeBreakingSpeedConfig;
+import me.adda.enhanced_falling_trees.config.common.TreeBreakingConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
@@ -38,6 +38,6 @@ public class CommonConfig implements ConfigData {
 
 	@ConfigEntry.Category("tree_breaking")
 	@ConfigEntry.Gui.TransitiveObject
-	public TreeBreakingSpeedConfig treeBreaking = new TreeBreakingSpeedConfig();
+	public TreeBreakingConfig treeBreaking = new TreeBreakingConfig();
 
 }
