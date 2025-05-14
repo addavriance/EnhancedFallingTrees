@@ -6,13 +6,13 @@ import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
 import org.jetbrains.annotations.NotNull;
 
-public class LeavesParticles extends SimpleAnimatedParticle {
+public class LeavesParticles extends TextureSheetParticle {
     protected final float maxRotateSpeed;
     protected final int maxRotateTime;
     protected int rotateTime = 0;
 
-    public LeavesParticles(ClientLevel world, double x, double y, double z, SpriteSet sprites) {
-        super(world, x, y, z, sprites, 0f);
+    public LeavesParticles(ClientLevel world, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+        super(world, x, y, z, xd, yd, zd);
 
         this.xd = random.nextGaussian() * 0.09D;
         this.yd = random.nextFloat() * 0.1D;
@@ -20,10 +20,6 @@ public class LeavesParticles extends SimpleAnimatedParticle {
 
         this.gravity = 0.08f + random.nextFloat() * 0.04f;
         this.quadSize = 0.125f;
-
-        this.rCol = 1f;
-        this.gCol = 1f;
-        this.bCol = 1f;
 
         this.setSprite(sprites.get(random));
         this.setSize(0.02F, 0.02F);
@@ -41,9 +37,11 @@ public class LeavesParticles extends SimpleAnimatedParticle {
     public void tick() {
         super.tick();
 
-        this.oRoll = this.roll;
-        rotateTime = Math.min(rotateTime + 1, maxRotateTime);
-        this.roll += (rotateTime / (float) maxRotateTime) * maxRotateSpeed;
+        if (!this.onGround) {
+            this.oRoll = this.roll;
+            rotateTime = Math.min(rotateTime + 1, maxRotateTime);
+            this.roll += (rotateTime / (float) maxRotateTime) * maxRotateSpeed;
+        }
 
         fadeOut();
     }
@@ -52,23 +50,23 @@ public class LeavesParticles extends SimpleAnimatedParticle {
         this.alpha = (-(1/(float)lifetime) * age + 1);
     }
 
+    @Override
     public @NotNull ParticleRenderType getRenderType() {
         return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
     public static class Factory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteProvider;
+        private final SpriteSet sprites;
 
         public Factory(SpriteSet sprites) {
-            this.spriteProvider = sprites;
+            this.sprites = sprites;
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double Xv, double Yv, double Zv) {
-            LeavesParticles leaves = new LeavesParticles(world, x, y, z, spriteProvider);
-            leaves.pickSprite(this.spriteProvider);
-            return leaves;
+        public Particle createParticle(SimpleParticleType type, ClientLevel world,
+                                       double x, double y, double z,
+                                       double xd, double yd, double zd) {
+            return new LeavesParticles(world, x, y, z, xd, yd, zd, sprites);
         }
     }
 }
-
