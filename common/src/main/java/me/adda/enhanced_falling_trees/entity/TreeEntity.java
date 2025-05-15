@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Math;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -70,7 +70,7 @@ public class TreeEntity extends Entity {
 		this.owner = owner;
 		this.treeType = treeType;
 
-		Map<BlockPos, BlockState> blockPosMap = new HashMap<>();
+		Map<BlockPos, BlockState> blockPosMap = new ConcurrentHashMap<>();
 
 		for (BlockPos pos : blockPosList) {
 			blockPosMap.put(pos.immutable().subtract(originBlock), level().getBlockState(pos));
@@ -91,7 +91,7 @@ public class TreeEntity extends Entity {
 
 	@Override
 	protected void defineSynchedData() {
-		this.getEntityData().define(BLOCKS, new HashMap<>());
+		this.getEntityData().define(BLOCKS, new ConcurrentHashMap<>());
 		this.getEntityData().define(ANGLE, 0f);
 		this.getEntityData().define(TARGET_ANGLE, 0f);
 		this.getEntityData().define(LEAVES_DROPPED, false);

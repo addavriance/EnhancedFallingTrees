@@ -3,13 +3,13 @@ package me.adda.enhanced_falling_trees.api;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class TreeRegistry {
-	private static final Map<ResourceLocation, TreeType> REGISTRIES = new HashMap<>();
+	private static final Map<ResourceLocation, TreeType> REGISTRIES = new ConcurrentHashMap<>();
 
 	public static Supplier<TreeType> register(ResourceLocation resourceLocation, Supplier<TreeType> treeTypeSupplier) {
 		REGISTRIES.put(resourceLocation, treeTypeSupplier.get());

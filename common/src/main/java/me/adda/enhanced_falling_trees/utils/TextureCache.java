@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Environment(EnvType.CLIENT)
 public class TextureCache {
@@ -28,7 +28,7 @@ public class TextureCache {
         }
     }
 
-    public static final HashMap<ResourceLocation, Data> INST = new HashMap<>();
+    public static final ConcurrentHashMap<ResourceLocation, Data> INST = new ConcurrentHashMap<>();
 
     private TextureCache() {}
 
