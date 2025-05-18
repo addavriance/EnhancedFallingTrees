@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.7.412" apply false
 }
 
 architectury {
@@ -21,7 +21,7 @@ subprojects {
 
         mappings loom.layered() {
             officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}@zip")
+            parchment("org.parchmentmc.data:parchment-${minecraft_version}:${rootProject.parchment_version}@zip")
         }
     }
 }

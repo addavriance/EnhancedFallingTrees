@@ -33,7 +33,7 @@ dependencies {
 
     modApi("me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_version}")
 
-    modCompileOnly("maven.modrinth:jade:${rootProject.jade_version}+forge-forge,${rootProject.jade_minecraft_version}")
+//    modCompileOnly("maven.modrinth:jade:${rootProject.jade_version}+forge-forge,${rootProject.jade_minecraft_version}")
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
