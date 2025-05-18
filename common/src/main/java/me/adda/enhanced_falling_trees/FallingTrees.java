@@ -4,6 +4,7 @@ import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.event.EventHandler;
 import me.adda.enhanced_falling_trees.network.PacketHandler;
 import me.adda.enhanced_falling_trees.registry.EntityRegistry;
+import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
 import me.adda.enhanced_falling_trees.registry.SoundRegistry;
 import me.adda.enhanced_falling_trees.registry.TreeTypeRegistry;
 import me.adda.enhanced_falling_trees.utils.BlockMapEntityData;
@@ -23,6 +24,8 @@ public class FallingTrees {
 		EntityRegistry.ENTITIES.register();
 		PacketHandler.register();
 		EventHandler.register();
+
+		PlatformTest.testPlatform();
 
 		EntityDataSerializers.registerSerializer(BlockMapEntityData.BLOCK_MAP);
 	}

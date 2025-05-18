@@ -1,12 +1,12 @@
 package me.adda.enhanced_falling_trees.config;
 
-import dev.architectury.platform.Platform;
 import me.adda.enhanced_falling_trees.FallingTrees;
+import me.adda.enhanced_falling_trees.api.platform.EnvType;
+import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
 import me.adda.enhanced_falling_trees.network.ConfigPacket;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
-import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
 
@@ -19,7 +19,7 @@ public class FallingTreesConfig {
 		clientConfigHolder = AutoConfig.register(ClientConfig.class, GsonConfigSerializer::new);
 		commonConfigHolder = AutoConfig.register(CommonConfig.class, GsonConfigSerializer::new);
 
-		if (Platform.getEnv().equals(EnvType.CLIENT)) {
+		if (PlatformServices.getPlatform().getEnvironmentType().equals(EnvType.CLIENT)) {
 			clientConfigHolder.registerSaveListener(this::saveConfig);
 		}
 	}

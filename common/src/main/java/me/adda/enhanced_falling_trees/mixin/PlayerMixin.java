@@ -2,6 +2,7 @@ package me.adda.enhanced_falling_trees.mixin;
 
 import me.adda.enhanced_falling_trees.FallingTrees;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -17,8 +18,8 @@ public abstract class PlayerMixin extends LivingEntity {
 		super(entityType, level);
 	}
 
-	@Inject(method = "defineSynchedData", at = @At("RETURN"))
-	public void defineSynchedData(CallbackInfo ci) {
-		this.getEntityData().define(FallingTrees.PLAYER_CLIENT_CONFIG, new CompoundTag());
+	@Inject(method = "defineSynchedData(Lnet/minecraft/network/syncher/SynchedEntityData$Builder;)V", at = @At("RETURN"))
+	public void defineSynchedData(SynchedEntityData.Builder builder, CallbackInfo ci) {
+		builder.define(FallingTrees.PLAYER_CLIENT_CONFIG, new CompoundTag());
 	}
 }

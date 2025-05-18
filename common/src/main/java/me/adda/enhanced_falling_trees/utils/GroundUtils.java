@@ -210,8 +210,8 @@ public class GroundUtils {
 
         for (BlockPos pos : blockPoses) {
             BlockState blockState = entity.level().getBlockState(pos);
-            if (blockState.getBlock() instanceof LiquidBlock liquid){
-                height+=liquid.getFluidState(blockState).getOwnHeight();
+            if (blockState.getBlock() instanceof LiquidBlock){
+                height+=blockState.getFluidState().getOwnHeight();
                 counter++;
             }
         }

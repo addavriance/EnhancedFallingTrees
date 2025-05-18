@@ -1,12 +1,12 @@
 package me.adda.enhanced_falling_trees.trees;
 
-import dev.architectury.platform.Platform;
 import me.adda.enhanced_falling_trees.api.TreeType;
+import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.registry.SoundRegistry;
 import me.adda.enhanced_falling_trees.utils.GroundUtils;
-import net.fabricmc.api.EnvType;
+import me.adda.enhanced_falling_trees.api.platform.EnvType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -47,7 +47,7 @@ public class BambooTree implements TreeType {
 	public void handleSpecialEffects(TreeEntity entity) {
 		if (entity == null) return;
 
-		if (Platform.getEnv() == EnvType.CLIENT) {
+		if (PlatformServices.getPlatform().getEnvironmentType() == EnvType.CLIENT) {
 			if (entity.tickCount == 1) {
 				if (FallingTreesConfig.getClientConfig().soundSettings.enabled) {
 					entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(),

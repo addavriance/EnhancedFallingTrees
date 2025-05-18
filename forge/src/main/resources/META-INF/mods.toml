@@ -40,9 +40,3 @@ issueTrackerURL="https://github.com/addavriance/EnhancedFallingTrees/issues"
     versionRange="[11.1.106,)"
     ordering="NONE"
     side="BOTH"
-[[dependencies.efallingtrees]]
-    modId="architectury"
-    mandatory=true
-    versionRange="[9.1.12,)"
-    ordering="NONE"
-    side="BOTH"

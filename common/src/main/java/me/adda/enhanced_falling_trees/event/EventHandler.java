@@ -1,15 +1,13 @@
 package me.adda.enhanced_falling_trees.event;
 
-import dev.architectury.event.EventResult;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.event.events.client.ClientPlayerEvent;
-import dev.architectury.event.events.common.BlockEvent;
-import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.platform.Platform;
-import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
-import dev.architectury.utils.value.IntValue;
 import me.adda.enhanced_falling_trees.api.TreeRegistry;
 import me.adda.enhanced_falling_trees.api.TreeType;
+import me.adda.enhanced_falling_trees.api.platform.EnvType;
+import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
+import me.adda.enhanced_falling_trees.api.platform.event.EventManager;
+import me.adda.enhanced_falling_trees.api.platform.event.EventResult;
+import me.adda.enhanced_falling_trees.api.platform.event.EventServices;
+import me.adda.enhanced_falling_trees.api.platform.event.IntValue;
 import me.adda.enhanced_falling_trees.client.render.TreeRenderer;
 import me.adda.enhanced_falling_trees.config.CommonConfig;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
@@ -17,7 +15,6 @@ import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.network.ConfigPacket;
 import me.adda.enhanced_falling_trees.registry.EntityRegistry;
 import me.adda.enhanced_falling_trees.trees.DefaultTree;
-import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -36,18 +33,26 @@ import java.util.Set;
 
 public class EventHandler {
 	public static void register() {
-		if (Platform.getEnv() == EnvType.CLIENT) {
-			if (Platform.isFabric()) ClientLifecycleEvent.CLIENT_SETUP.register(EventHandler::onClientSetup);
-			if (Platform.isForge()) onClientSetup(Minecraft.getInstance());
+		EventManager eventManager = EventServices.getEventManager();
+
+		System.out.println("Регистерим ивенты");
+
+		if (PlatformServices.getPlatform().getEnvironmentType() == EnvType.CLIENT) {
+			eventManager.registerClientPlayerJoinEvent(EventHandler::onClientPlayerJoin);
+			eventManager.registerClientSetupEvent(EventHandler::onClientSetup);
 		}
-		BlockEvent.BREAK.register(EventHandler::onBlockBreak);
-		PlayerEvent.PLAYER_JOIN.register(EventHandler::onPlayerJoin);
+
+		eventManager.registerBlockBreakEvent(EventHandler::onBlockBreak);
+		eventManager.registerPlayerJoinEvent(EventHandler::onPlayerJoin);
 	}
 
 	private static void onClientSetup(Minecraft minecraft) {
-		ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(EventHandler::onClientPlayerJoin);
+		System.out.println("Регистерим ивент на сетапе клиента");
 
-		EntityRendererRegistry.register(EntityRegistry.TREE, TreeRenderer::new);
+		PlatformServices.CLIENT.registerEntityRenderer(
+				EntityRegistry.TREE.get(),
+				TreeRenderer::new
+		);
 	}
 
 	private static EventResult onBlockBreak(Level level, BlockPos blockPos, BlockState blockState, ServerPlayer serverPlayer, IntValue intValue) {
@@ -60,6 +65,7 @@ public class EventHandler {
 	private static void onPlayerJoin(ServerPlayer serverPlayer) {
 		ConfigPacket.sendToPlayer(serverPlayer);
 	}
+
 	private static void onClientPlayerJoin(LocalPlayer localPlayer) {
 		ConfigPacket.sendToServer();
 	}
@@ -89,13 +95,13 @@ public class EventHandler {
 
 		if (treeType instanceof DefaultTree)
 			if (!mainItem.isEmpty() && treeType.allowedTool(mainItem)) {
-				mainItem.hurtAndBreak(commonConfig.multiplyToolDamage ? (int) baseAmount : 1, player, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+				mainItem.hurtAndBreak(commonConfig.multiplyToolDamage ? (int) baseAmount : 1, player, EquipmentSlot.MAINHAND);
 			} else {
 				player.causeFoodExhaustion(2F * (commonConfig.multiplyFoodExhaustion ? treeBlockPos.toArray().length : 1));
 			}
 		else
 			if (!mainItem.isEmpty() && treeType.allowedTool(mainItem)) {
-				mainItem.hurtAndBreak(1, player, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+				mainItem.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
 			} else {
 				player.causeFoodExhaustion(2);
 			}
