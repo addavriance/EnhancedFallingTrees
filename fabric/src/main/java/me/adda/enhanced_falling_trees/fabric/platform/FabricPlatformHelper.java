@@ -1,14 +1,13 @@
 package me.adda.enhanced_falling_trees.fabric.platform;
 
 
-import me.adda.enhanced_falling_trees.api.platform.EnvType;
 import me.adda.enhanced_falling_trees.api.platform.PlatformHelper;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class FabricPlatformHelper implements PlatformHelper {
     @Override
-    public EnvType getEnvironmentType() {
-        return FabricLoader.getInstance().getEnvironmentType() == net.fabricmc.api.EnvType.CLIENT ? EnvType.CLIENT : EnvType.SERVER;
+    public boolean isClient() {
+        return FabricLoader.getInstance().getEnvironmentType() == net.fabricmc.api.EnvType.CLIENT;
     }
 
     @Override

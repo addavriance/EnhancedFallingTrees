@@ -12,13 +12,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class FabricNetworkService implements NetworkService {
     private final Map<ResourceLocation, BiConsumer<FriendlyByteBuf, PacketContext>> serverHandlers = new ConcurrentHashMap<>();
-    private final Map<ResourceLocation, BiConsumer<FriendlyByteBuf, PacketContext>> clientHandlers = new ConcurrentHashMap<>();
+
+    // S2C handlers stored here during init, registered in onInitializeClient
+    private static final Map<ResourceLocation, BiConsumer<FriendlyByteBuf, PacketContext>> PENDING_S2C = new LinkedHashMap<>();
 
     private static MinecraftServer SERVER;
 
@@ -44,12 +47,18 @@ public class FabricNetworkService implements NetworkService {
 
     @Override
     public void registerServerToClientPacket(ResourceLocation id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
-        CustomPacketPayload.Type<FallingTreesPayload> type = FallingTreesPayload.getType(id);
+        // Defer actual registration to onInitializeClient — Fabric 0.97+ requires
+        // ClientPlayNetworking.registerGlobalReceiver to be called from the client entrypoint
+        PENDING_S2C.put(id, handler);
+    }
 
-        ClientPlayNetworking.registerGlobalReceiver(type, (payload, context) -> {
-            clientHandlers.put(id, handler);
-            FabricPacketContext packetContext = new FabricPacketContext(context.player(), context.responseSender());
-            handler.accept((FriendlyByteBuf) payload.data(), packetContext);
+    public static void initializeClientReceivers() {
+        PENDING_S2C.forEach((id, handler) -> {
+            CustomPacketPayload.Type<FallingTreesPayload> type = FallingTreesPayload.getType(id);
+            ClientPlayNetworking.registerGlobalReceiver(type, (payload, context) -> {
+                FabricPacketContext ctx = new FabricPacketContext(context.player(), context.responseSender());
+                handler.accept((FriendlyByteBuf) payload.data(), ctx);
+            });
         });
     }
 
