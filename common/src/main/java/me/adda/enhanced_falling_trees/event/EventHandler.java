@@ -2,7 +2,6 @@ package me.adda.enhanced_falling_trees.event;
 
 import me.adda.enhanced_falling_trees.api.TreeRegistry;
 import me.adda.enhanced_falling_trees.api.TreeType;
-import me.adda.enhanced_falling_trees.api.platform.EnvType;
 import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
 import me.adda.enhanced_falling_trees.api.platform.event.EventManager;
 import me.adda.enhanced_falling_trees.api.platform.event.EventResult;
@@ -37,7 +36,7 @@ public class EventHandler {
 
 		System.out.println("Регистерим ивенты");
 
-		if (PlatformServices.getPlatform().getEnvironmentType() == EnvType.CLIENT) {
+		if (PlatformServices.getPlatform().isClient()) {
 			eventManager.registerClientPlayerJoinEvent(EventHandler::onClientPlayerJoin);
 			eventManager.registerClientSetupEvent(EventHandler::onClientSetup);
 		}

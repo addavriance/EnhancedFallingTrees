@@ -10,6 +10,6 @@ public class PlatformTest {
     public static void testPlatform() {
         String platform = PlatformServices.getPlatform().getPlatformName();
         LOGGER.info("Running on platform: {}", platform);
-        LOGGER.info("Environment: {}", PlatformServices.getPlatform().getEnvironmentType());
+        LOGGER.info("Environment: {}", PlatformServices.getPlatform().isClient() ? "CLIENT" : "SERVER");
     }
 }

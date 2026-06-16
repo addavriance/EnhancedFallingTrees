@@ -1,13 +1,11 @@
 package me.adda.enhanced_falling_trees.trees;
 
-import dev.architectury.platform.Platform;
 import me.adda.enhanced_falling_trees.api.TreeType;
 import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
 import me.adda.enhanced_falling_trees.client.TreeEffects;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.utils.GroundUtils;
-import me.adda.enhanced_falling_trees.api.platform.EnvType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.ItemTags;
@@ -63,7 +61,7 @@ public class DefaultTree implements TreeType {
 	public void handleSpecialEffects(TreeEntity entity) {
 		if (entity == null ) return;
 
-		if (PlatformServices.getPlatform().getEnvironmentType() == EnvType.CLIENT) {
+		if (PlatformServices.getPlatform().isClient()) {
 			if (entity.tickCount == 1) {
 				TreeEffects.playTreeFallSound(entity);
 			}
@@ -79,7 +77,7 @@ public class DefaultTree implements TreeType {
 	}
 
 	private void handleParticles(TreeEntity entity) {
-		if (!(PlatformServices.getPlatform().getEnvironmentType() == EnvType.CLIENT && entity.level().isClientSide)) return;
+		if (!(PlatformServices.getPlatform().isClient() && entity.level().isClientSide)) return;
 
 		BlockState leavesState = getParticleBlockState(entity);
 		if (leavesState == null) return;

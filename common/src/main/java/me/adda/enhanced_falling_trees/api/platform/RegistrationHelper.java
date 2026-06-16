@@ -2,6 +2,8 @@ package me.adda.enhanced_falling_trees.api.platform;
 
 import me.adda.enhanced_falling_trees.api.platform.registry.DeferredObject;
 import net.minecraft.core.Registry;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -13,4 +15,8 @@ public interface RegistrationHelper {
     <T> void register(DeferredObject<? extends T> deferredObject, Supplier<? extends T> supplier);
     <T> void registerNewRegistry(Registry<T> registry);
     void registerReloadListener(PackType packType, PreparableReloadListener listener, ResourceLocation id, List<ResourceLocation> dependencies);
+
+    default void registerEntityDataSerializer(ResourceLocation id, EntityDataSerializer<?> serializer) {
+        EntityDataSerializers.registerSerializer(serializer);
+    }
 }

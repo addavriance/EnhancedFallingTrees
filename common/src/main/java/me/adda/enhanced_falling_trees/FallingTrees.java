@@ -1,5 +1,6 @@
 package me.adda.enhanced_falling_trees;
 
+import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.event.EventHandler;
 import me.adda.enhanced_falling_trees.network.PacketHandler;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 public class FallingTrees {
@@ -27,7 +29,8 @@ public class FallingTrees {
 
 		PlatformTest.testPlatform();
 
-		EntityDataSerializers.registerSerializer(BlockMapEntityData.BLOCK_MAP);
+		PlatformServices.REGISTRATION.registerEntityDataSerializer(
+				new ResourceLocation(MOD_ID, "block_map"), BlockMapEntityData.BLOCK_MAP);
 	}
 
 	public static final EntityDataAccessor<CompoundTag> PLAYER_CLIENT_CONFIG =

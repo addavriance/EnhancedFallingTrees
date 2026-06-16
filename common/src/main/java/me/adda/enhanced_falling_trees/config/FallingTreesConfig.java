@@ -1,7 +1,6 @@
 package me.adda.enhanced_falling_trees.config;
 
 import me.adda.enhanced_falling_trees.FallingTrees;
-import me.adda.enhanced_falling_trees.api.platform.EnvType;
 import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
 import me.adda.enhanced_falling_trees.network.ConfigPacket;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -19,7 +18,7 @@ public class FallingTreesConfig {
 		clientConfigHolder = AutoConfig.register(ClientConfig.class, GsonConfigSerializer::new);
 		commonConfigHolder = AutoConfig.register(CommonConfig.class, GsonConfigSerializer::new);
 
-		if (PlatformServices.getPlatform().getEnvironmentType().equals(EnvType.CLIENT)) {
+		if (PlatformServices.getPlatform().isClient()) {
 			clientConfigHolder.registerSaveListener(this::saveConfig);
 		}
 	}
