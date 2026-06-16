@@ -1,0 +1,87 @@
+import java.text.SimpleDateFormat
+
+tasks.register('sendToTelegram') {
+    description = 'Sends built JAR files to Telegram'
+    group = 'distribution'
+
+    doLast {
+        def botToken = System.getenv('TELEGRAM_BOT_TOKEN')
+        def chatId = System.getenv('TELEGRAM_CHAT_ID')
+
+        if (!botToken || !chatId) {
+            throw new GradleException('TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID env vars not set')
+        }
+
+        def date = new Date()
+        def dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm")
+        def formattedDate = dateFormat.format(date)
+        def gitInfo = getGitInfo()
+
+        println "Sending artifacts to Telegram..."
+
+        ['fabric', 'forge', 'neoforge'].each { modType ->
+            def jarName = "${archivesBaseName}-${mod_version}-${minecraft_version}+${modType}.jar"
+            def jarFile = file("${modType}/build/libs/${jarName}")
+
+            if (jarFile.exists()) {
+                println "📦 Sending ${jarName}..."
+
+                def caption = "🌲 EnhancedFallingTrees Build\n" +
+                        "• Version: ${mod_version}\n" +
+                        "• Platform: ${modType.capitalize()}\n" +
+                        "• Minecraft: ${minecraft_version}\n" +
+                        "• Build time: ${formattedDate}\n" +
+                        "• Size: ${formatFileSize(jarFile.length())}\n" +
+                        "${gitInfo}"
+
+                def tempFile = File.createTempFile("caption", ".txt")
+                tempFile.deleteOnExit()
+                tempFile.text = caption
+
+                exec {
+                    commandLine 'curl', '-sS', '-o', '/dev/null', '-X', 'POST',
+                            '-F', "chat_id=${chatId}",
+                            '-F', "document=@${jarFile.absolutePath}",
+                            '-F', "caption=<${tempFile.absolutePath}",
+                            "https://api.telegram.org/bot${botToken}/sendDocument"
+                    ignoreExitValue true
+                }
+
+                println "✅ ${jarName} sent"
+            } else {
+                println "⚠️ Not found: ${jarFile.absolutePath}"
+            }
+        }
+
+        println "✨ Done!"
+    }
+}
+
+tasks.register('buildAndSend') {
+    description = 'Builds all platforms and sends JARs to Telegram'
+    group = 'distribution'
+
+    dependsOn ':fabric:remapJar'
+    dependsOn ':forge:remapJar'
+    dependsOn ':neoforge:remapJar'
+
+    finalizedBy 'sendToTelegram'
+}
+
+static def getGitInfo() {
+    try {
+        def hash = "git rev-parse --short HEAD".execute().text.trim()
+        def branch = "git rev-parse --abbrev-ref HEAD".execute().text.trim()
+        def message = "git log -1 --pretty=%s".execute().text.trim()
+        return "• Branch: ${branch}\n• Commit: ${hash}\n• Message: ${message}"
+    } catch (Exception ignored) {
+        return "• Git info not available"
+    }
+}
+
+static def formatFileSize(long bytes) {
+    if (bytes < 1024) return "${bytes} B"
+    def kb = bytes / 1024.0
+    if (kb < 1024) return String.format("%.1f KB", kb)
+    return String.format("%.1f MB", kb / 1024.0)
+}

@@ -56,6 +56,8 @@ allprojects {
         }
 
         maven { url = uri("https://maven.shedaniel.me/") }
+        maven { url = uri("https://maven.neoforged.net/releases") }
+        maven { url = uri("https://maven.quiltmc.org/repository/release") }
     }
 
     tasks.withType(JavaCompile) {
@@ -67,3 +69,5 @@ allprojects {
         withSourcesJar()
     }
 }
+
+apply from: 'gradle/telegram.gradle'
