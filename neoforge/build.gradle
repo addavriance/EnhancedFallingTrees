@@ -26,10 +26,6 @@ loom {
     }
 }
 
-tasks.withType(JavaCompile) {
-    options.release = 21
-}
-
 configurations {
     common
     shadowCommon
