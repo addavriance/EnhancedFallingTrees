@@ -15,9 +15,7 @@ public record FallingTreesPayload(ResourceLocation id, ByteBuf data) implements 
 
     @SuppressWarnings("unchecked")
     public static <T extends FallingTreesPayload> Type<T> getType(ResourceLocation id) {
-        return (Type<T>) TYPES.computeIfAbsent(id, resourceId ->
-                CustomPacketPayload.createType(resourceId.toString())
-        );
+        return (Type<T>) TYPES.computeIfAbsent(id, Type::new);
     }
 
     @Override

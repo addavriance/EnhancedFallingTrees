@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public record ConfigPayload(String configData) implements CustomPacketPayload {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet");
-    public static final Type<ConfigPayload> TYPE = CustomPacketPayload.createType(ID.toString());
+    public static final Type<ConfigPayload> TYPE = new Type<>(ID);
 
     @Override
     public Type<?> type() {
