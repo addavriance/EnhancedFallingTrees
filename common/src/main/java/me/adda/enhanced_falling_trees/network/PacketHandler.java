@@ -6,7 +6,7 @@ import me.adda.enhanced_falling_trees.api.platform.network.NetworkServices;
 import net.minecraft.resources.ResourceLocation;
 
 public class PacketHandler {
-	public static final ResourceLocation CONFIG_PACKET_ID = new ResourceLocation(FallingTrees.MOD_ID, "config_packet");
+	public static final ResourceLocation CONFIG_PACKET_ID = ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet");
 
 	public static void register() {
 		if (PlatformServices.getPlatform().isClient()) {

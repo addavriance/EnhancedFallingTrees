@@ -30,7 +30,7 @@ public class FallingTrees {
 		PlatformTest.testPlatform();
 
 		PlatformServices.REGISTRATION.registerEntityDataSerializer(
-				new ResourceLocation(MOD_ID, "block_map"), BlockMapEntityData.BLOCK_MAP);
+				ResourceLocation.fromNamespaceAndPath(MOD_ID, "block_map"), BlockMapEntityData.BLOCK_MAP);
 	}
 
 	public static final EntityDataAccessor<CompoundTag> PLAYER_CLIENT_CONFIG =

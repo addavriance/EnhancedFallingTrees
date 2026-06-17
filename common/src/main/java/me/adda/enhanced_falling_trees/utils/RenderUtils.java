@@ -126,7 +126,7 @@ public class RenderUtils {
 	}
 
 	public static float getDeltaTime() {
-		return Minecraft.getInstance().getDeltaFrameTime() / 20;
+		return Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() / 20;
 	}
 
 	public interface FaceRenderCondition {

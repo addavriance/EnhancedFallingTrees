@@ -126,6 +126,6 @@ public class LeavesUtils {
 
     public static ResourceLocation spriteToTexture(TextureAtlasSprite sprite) {
         String texture = sprite.contents().name().getPath();
-        return new ResourceLocation(sprite.contents().name().getNamespace(), "textures/" + texture + ".png");
+        return ResourceLocation.fromNamespaceAndPath(sprite.contents().name().getNamespace(), "textures/" + texture + ".png");
     }
 }

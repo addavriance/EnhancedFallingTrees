@@ -23,7 +23,7 @@ public class FallingTreesFabric implements ModInitializer {
 
     private void registerPayloadTypes() {
         // Регистрируем все типы пакетов, которые будут использоваться
-        registerPayloadType(new ResourceLocation(FallingTrees.MOD_ID, "config_packet"));
+        registerPayloadType(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet"));
         // Добавьте здесь другие типы пакетов по мере необходимости
     }
 

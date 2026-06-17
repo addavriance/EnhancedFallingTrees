@@ -34,11 +34,11 @@ public class DeferredRegister<T> {
     }
 
     public <R extends T> DeferredObject<R> register(String name, Function<ResourceKey<T>, R> registryFunc) {
-        return register(new ResourceLocation(namespace, name), registryFunc);
+        return register(ResourceLocation.fromNamespaceAndPath(namespace, name), registryFunc);
     }
 
     public <R extends T> DeferredObject<R> register(String name, Supplier<R> registrySup) {
-        return register(new ResourceLocation(namespace, name), registrySup);
+        return register(ResourceLocation.fromNamespaceAndPath(namespace, name), registrySup);
     }
 
     public <R extends T> DeferredObject<R> register(ResourceLocation name, Function<ResourceKey<T>, R> registryFunc) {
