@@ -22,7 +22,7 @@ public class ClientHelperNeoForge implements ClientHelper {
     @Override
     public <T extends Entity> void registerEntityRenderer(
             EntityType<T> entityType,
-            Function<EntityRendererProvider.Context, EntityRenderer<T>> rendererFactory) {
+            Function<EntityRendererProvider.Context, EntityRenderer<T, ?>> rendererFactory) {
         RENDERERS.add(new RendererEntry<>(entityType, rendererFactory));
     }
 
@@ -41,9 +41,9 @@ public class ClientHelperNeoForge implements ClientHelper {
 
     private static class RendererEntry<T extends Entity> {
         final EntityType<T> entityType;
-        final Function<EntityRendererProvider.Context, EntityRenderer<T>> factory;
+        final Function<EntityRendererProvider.Context, EntityRenderer<T, ?>> factory;
 
-        RendererEntry(EntityType<T> entityType, Function<EntityRendererProvider.Context, EntityRenderer<T>> factory) {
+        RendererEntry(EntityType<T> entityType, Function<EntityRendererProvider.Context, EntityRenderer<T, ?>> factory) {
             this.entityType = entityType;
             this.factory = factory;
         }

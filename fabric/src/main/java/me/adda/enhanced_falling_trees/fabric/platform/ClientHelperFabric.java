@@ -13,7 +13,7 @@ public class ClientHelperFabric implements ClientHelper {
     @Override
     public <T extends Entity> void registerEntityRenderer(
             EntityType<T> entityType,
-            Function<EntityRendererProvider.Context, EntityRenderer<T>> rendererFactory) {
+            Function<EntityRendererProvider.Context, EntityRenderer<T, ?>> rendererFactory) {
         System.out.println("Регистерим рендерер для фабрика");
         EntityRendererRegistry.register(entityType, rendererFactory::apply);
     }

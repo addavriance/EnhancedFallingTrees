@@ -11,7 +11,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -57,8 +57,8 @@ public class NeoForgeRegistrationHelper implements RegistrationHelper {
         }
     }
 
-    private static void onAddReloadListener(AddReloadListenerEvent event) {
-        RELOAD_LISTENERS.forEach((id, listener) -> event.addListener(listener));
+    private static void onAddReloadListener(AddServerReloadListenersEvent event) {
+        RELOAD_LISTENERS.forEach(event::addListener);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
