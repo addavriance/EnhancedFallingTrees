@@ -10,6 +10,6 @@ import java.util.function.Function;
 public interface ClientHelper {
     <T extends Entity> void registerEntityRenderer(
             EntityType<T> entityType,
-            Function<EntityRendererProvider.Context, EntityRenderer<T>> rendererFactory
+            Function<EntityRendererProvider.Context, EntityRenderer<T, ?>> rendererFactory
     );
 }

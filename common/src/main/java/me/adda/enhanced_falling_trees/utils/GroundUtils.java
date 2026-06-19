@@ -21,7 +21,7 @@ public class GroundUtils {
         Integer[] indexes = new Integer[treeHeight];
 
         for (int i = 0; i < treeHeight; i++) {
-            BlockPos blockPos = entity.getOnPos().offset(entity.getDirection().getNormal()).relative(entity.getDirection(), offset + i);
+            BlockPos blockPos = entity.getOnPos().offset(entity.getDirection().getUnitVec3i()).relative(entity.getDirection(), offset + i);
 
             int groundIndex = 0;
 
@@ -56,7 +56,7 @@ public class GroundUtils {
         BlockPos[] blocksPoses = new BlockPos[treeHeight];
 
         for (int i = 0; i < treeHeight; i++) {
-            BlockPos blockPos = entity.getOnPos().offset(entity.getDirection().getNormal()).relative(entity.getDirection(), i);
+            BlockPos blockPos = entity.getOnPos().offset(entity.getDirection().getUnitVec3i()).relative(entity.getDirection(), i);
 
             blocksPoses[i] = (blockPos.offset(0, indexes[i], 0));
         }
@@ -143,7 +143,7 @@ public class GroundUtils {
     }
 
     public static BlockPos calculateEndPos(BlockPos firstPoint, Direction fallDirection, double angleDegrees, int distance) {
-        Vec3i lineVector = fallDirection.getNormal();
+        Vec3i lineVector = fallDirection.getUnitVec3i();
 
         double angleRadians = Math.toRadians(angleDegrees);
 

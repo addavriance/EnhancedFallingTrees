@@ -45,7 +45,7 @@ public class ChorusTree implements TreeType {
 			if (this.baseBlockCheck(blockState)) {
 				for (Direction direction : Direction.values()) {
 					if (blockState.getValue(ChorusPlantBlock.PROPERTY_BY_DIRECTION.get(direction))) {
-						BlockPos neighborPos = originPos.offset(direction.getNormal());
+						BlockPos neighborPos = originPos.offset(direction.getUnitVec3i());
 						loopBlocks(level, neighborPos, blocks, loopedBlocks);
 					}
 				}

@@ -7,6 +7,7 @@ import me.adda.enhanced_falling_trees.api.platform.registry.DeferredRegister;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 
@@ -20,7 +21,7 @@ public class EntityRegistry {
 					.noSave()
 					.fireImmune()
 					.noSummon()
-					.build(("tree")));
+					.build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "tree"))));
 
 	public static void initialize() {
 		ENTITIES.register();

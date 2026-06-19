@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -122,11 +123,11 @@ public class RenderUtils {
 	}
 
 	public static void renderBoundingBox(PoseStack poseStack, AABB boundingBox, VertexConsumer buffer) {
-		LevelRenderer.renderLineBox(poseStack, buffer, boundingBox, 1.0f, 1.0f, 1.0f, 1.0f);
+		ShapeRenderer.renderLineBox(poseStack, buffer, boundingBox, 1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	public static float getDeltaTime() {
-		return Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() / 20;
+		return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks() / 20;
 	}
 
 	public interface FaceRenderCondition {

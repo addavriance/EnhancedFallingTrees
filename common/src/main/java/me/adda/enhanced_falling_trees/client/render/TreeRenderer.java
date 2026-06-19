@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Math;
 import org.joml.Quaternionf;
@@ -23,7 +22,7 @@ import org.joml.Vector3f;
 import java.util.Map;
 
 @Environment(EnvType.CLIENT)
-public class TreeRenderer extends EntityRenderer<TreeEntity> {
+public class TreeRenderer extends EntityRenderer<TreeEntity, TreeRenderState> {
 	private static final float PI = (float) Math.PI;
 	private static final float HALF_PI = PI / 2;
 	private static final float TWO_PI = PI * 2;
@@ -37,29 +36,48 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 	}
 
 	@Override
-	public void render(TreeEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
-					   MultiBufferSource buffer, int packedLight) {
-		TreeType treeType = entity.getTreeType();
-		if (treeType == null) return;
+	public TreeRenderState createRenderState() {
+		return new TreeRenderState();
+	}
 
-		Map<BlockPos, BlockState> blocks = entity.getBlocks();
-		if (blocks.isEmpty()) return;
+	@Override
+	public void extractRenderState(TreeEntity entity, TreeRenderState state, float partialTick) {
+		super.extractRenderState(entity, state, partialTick);
+
+		TreeType treeType = entity.getTreeType();
+		state.treeType = treeType;
+		state.blocks = entity.getBlocks();
+		state.originPos = entity.getOriginPos();
+		state.level = entity.level();
+
+		if (treeType != null && !state.blocks.isEmpty()) {
+			AnimationParameters params = calculateAnimationParameters(entity, partialTick, treeType);
+			state.direction = entity.getDirection().getOpposite();
+			state.totalAnimation = params.totalAnimation();
+		}
+	}
+
+	@Override
+	protected boolean affectedByCulling(TreeEntity entity) {
+		return false;
+	}
+
+	@Override
+	public void render(TreeRenderState state, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+		if (state.treeType == null || state.blocks == null || state.blocks.isEmpty()) return;
 
 		poseStack.pushPose();
 		try {
-			renderTree(entity, partialTick, poseStack, buffer, blocks, treeType);
+			renderTree(state, poseStack, buffer);
 		} finally {
 			poseStack.popPose();
 		}
 	}
 
-	private void renderTree(TreeEntity entity, float partialTick, PoseStack poseStack,
-							MultiBufferSource buffer, Map<BlockPos, BlockState> blocks, TreeType treeType) {
-		AnimationParameters params = calculateAnimationParameters(entity, partialTick, treeType);
+	private void renderTree(TreeRenderState state, PoseStack poseStack, MultiBufferSource buffer) {
+		applyTreeTransformations(poseStack, state.blocks, state.treeType, state.direction, state.totalAnimation);
 
-		applyTreeTransformations(entity, poseStack, blocks, treeType, params);
-
-		renderTreeBlocks(entity, poseStack, buffer, blocks);
+		renderTreeBlocks(state, poseStack, buffer);
 	}
 
 	private record AnimationParameters(float fallAnim, float bounceAnim, float totalAnimation, float targetAngle) {
@@ -125,15 +143,14 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		}
 	}
 
-	private void applyTreeTransformations(TreeEntity entity, PoseStack poseStack,
-										  Map<BlockPos, BlockState> blocks, TreeType treeType, AnimationParameters params) {
-		Direction direction = entity.getDirection().getOpposite();
+	private void applyTreeTransformations(PoseStack poseStack, Map<BlockPos, BlockState> blocks,
+										  TreeType treeType, Direction direction, float totalAnimation) {
 		int distance = calculateTreeDistance(blocks, direction.getOpposite(), treeType);
 
-		Vector3f pivot = calculatePivotPoint(direction, distance, entity.getTreeType().fallAnimationEdgeDistance());
+		Vector3f pivot = calculatePivotPoint(direction, distance, treeType.fallAnimationEdgeDistance());
 		poseStack.translate(-pivot.x, 0, -pivot.z);
 
-		applyRotation(poseStack, params.totalAnimation, direction);
+		applyRotation(poseStack, totalAnimation, direction);
 
 		poseStack.translate(pivot.x, 0, pivot.z);
 
@@ -157,22 +174,21 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		poseStack.mulPose(rotation);
 	}
 
-	private void renderTreeBlocks(TreeEntity entity, PoseStack poseStack,
-								  MultiBufferSource buffer, Map<BlockPos, BlockState> blocks) {
+	private void renderTreeBlocks(TreeRenderState state, PoseStack poseStack, MultiBufferSource buffer) {
 		VertexConsumer consumer = buffer.getBuffer(RenderType.cutout());
 
-		blocks.forEach((blockPos, blockState) -> renderBlock(entity, poseStack, consumer, blockPos, blockState, blocks));
+		state.blocks.forEach((blockPos, blockState) -> renderBlock(state, poseStack, consumer, blockPos, blockState));
 	}
 
-	private void renderBlock(TreeEntity entity, PoseStack poseStack, VertexConsumer consumer,
-							 BlockPos blockPos, BlockState blockState, Map<BlockPos, BlockState> blocks) {
+	private void renderBlock(TreeRenderState state, PoseStack poseStack, VertexConsumer consumer,
+							 BlockPos blockPos, BlockState blockState) {
 		poseStack.pushPose();
 		try {
 			poseStack.translate(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 
-			RenderUtils.renderBlock(poseStack, blockState, blockPos.offset(entity.getOriginPos()),
-					entity.level(), consumer, (state, level, offset, face, pos) ->
-							shouldRenderFace(state, blocks, blockPos, face));
+			RenderUtils.renderBlock(poseStack, blockState, blockPos.offset(state.originPos),
+					state.level, consumer, (s, level, offset, face, pos) ->
+							shouldRenderFace(s, state.blocks, blockPos, face));
 		} finally {
 			poseStack.popPose();
 		}
@@ -182,7 +198,7 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 									 BlockPos pos, Direction face) {
 		if (!state.canOcclude()) return true;
 
-		BlockPos facePos = pos.offset(face.getNormal());
+		BlockPos facePos = pos.offset(face.getUnitVec3i());
 		if (!blocks.containsKey(facePos)) return true;
 
 		return !state.is(blocks.get(facePos).getBlock());
@@ -201,16 +217,16 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 		int nextWidth = getWidthAtDistance(blocks, distance + 1, direction, treeType);
 
 		return nextWidth >= currentWidth * 0.7 &&
-				blocks.containsKey(new BlockPos(direction.getNormal().multiply(distance + 1)));
+				blocks.containsKey(new BlockPos(direction.getUnitVec3i().multiply(distance + 1)));
 	}
 
 	private int getWidthAtDistance(Map<BlockPos, BlockState> blocks, int distance, Direction direction, TreeType treeType) {
-		BlockPos center = new BlockPos(direction.getNormal().multiply(distance));
+		BlockPos center = new BlockPos(direction.getUnitVec3i().multiply(distance));
 		int width = 0;
 
 		for (int x = -MAX_TREE_RADIUS; x <= MAX_TREE_RADIUS; x++) {
 			for (int y = -MAX_TREE_RADIUS; y <= MAX_TREE_RADIUS; y++) {
-				BlockPos checkPos = center.offset(direction.getClockWise().getNormal().multiply(x)).above(y);
+				BlockPos checkPos = center.offset(direction.getClockWise().getUnitVec3i().multiply(x)).above(y);
 				if (blocks.containsKey(checkPos) && treeType.baseBlockCheck(blocks.get(checkPos))) {
 					width++;
 				}
@@ -230,10 +246,5 @@ public class TreeRenderer extends EntityRenderer<TreeEntity> {
 
 	private float bumpSinLiquid(float time) {
 		return Math.sin(time);
-	}
-
-	@Override
-	public ResourceLocation getTextureLocation(TreeEntity entity) {
-		return null;
 	}
 }
