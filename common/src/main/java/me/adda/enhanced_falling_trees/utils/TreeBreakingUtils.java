@@ -2,6 +2,7 @@ package me.adda.enhanced_falling_trees.utils;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import me.adda.enhanced_falling_trees.api.TreeRegistry;
 import me.adda.enhanced_falling_trees.api.TreeType;
 import me.adda.enhanced_falling_trees.config.CommonConfig;
@@ -78,8 +79,15 @@ public class TreeBreakingUtils {
     }
 
     private static void cleanCache(long currentTime) {
-        treeCache.long2ObjectEntrySet().removeIf(entry ->
-                currentTime - entry.getValue().timestamp >= CACHE_LIFETIME);
+        LongArrayList expiredKeys = new LongArrayList();
+        for (Long2ObjectMap.Entry<TreeCacheEntry> entry : treeCache.long2ObjectEntrySet()) {
+            if (currentTime - entry.getValue().timestamp >= CACHE_LIFETIME) {
+                expiredKeys.add(entry.getLongKey());
+            }
+        }
+        for (long key : expiredKeys) {
+            treeCache.remove(key);
+        }
     }
 
     private static float getToolMultiplier(Player player, CommonConfig config) {
