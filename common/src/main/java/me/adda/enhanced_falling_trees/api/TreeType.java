@@ -106,7 +106,7 @@ public interface TreeType {
 			}
 		}
 
-		boolean invertCrouch = ConfigPacket.getClientConfig(player).getBoolean("invertCrouchMining");
+		boolean invertCrouch = ConfigPacket.getClientConfig(player).getBooleanOr("invertCrouchMining", false);
 
 		return !player.isCrouching() || (invertCrouch != FallingTreesConfig.getCommonConfig().isCrouchMiningAllowed);
 	}

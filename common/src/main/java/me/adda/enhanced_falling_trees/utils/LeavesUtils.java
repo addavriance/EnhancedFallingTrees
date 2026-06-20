@@ -6,8 +6,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -23,6 +24,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
@@ -48,9 +50,14 @@ public class LeavesUtils {
 
         int leafColor = getLeafColor(world, leavesState, leavesPos);
 
-        BakedModel model = client.getModelManager().getBlockModelShaper().getBlockModel(leavesState);
-        List<BakedQuad> quads = model.getQuads(leavesState, Direction.DOWN, random);
-        TextureAtlasSprite sprite = quads.isEmpty() ? model.getParticleIcon() : quads.get(0).getSprite();
+        BlockStateModel model = client.getModelManager().getBlockModelShaper().getBlockModel(leavesState);
+        List<BakedQuad> quads = new ArrayList<>();
+        for (BlockModelPart part : model.collectParts(random)) {
+            quads.addAll(part.getQuads(Direction.DOWN));
+        }
+        TextureAtlasSprite sprite = quads.isEmpty()
+                ? client.getModelManager().getBlockModelShaper().getParticleIcon(leavesState)
+                : quads.get(0).sprite();
         boolean shouldColor = quads.isEmpty() || quads.stream().anyMatch(BakedQuad::isTinted);
 
         ResourceLocation texture = spriteToTexture(sprite);

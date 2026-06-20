@@ -6,10 +6,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -18,7 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
-import java.util.BitSet;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RenderUtils {
@@ -62,12 +62,10 @@ public class RenderUtils {
 			VertexConsumer vertexConsumer,
 			FaceRenderCondition faceRenderCondition
 	) {
-		BitSet bitSet = new BitSet(3);
 		BlockPos.MutableBlockPos mutableBlockPos = context.blockPos.mutable();
 
 		for (Direction direction : Direction.values()) {
-			context.random.setSeed(context.seed);
-			List<BakedQuad> quads = context.model.getQuads(context.blockState, direction, context.random);
+			List<BakedQuad> quads = quadsForDirection(context.parts, direction);
 
 			if (quads.isEmpty()) continue;
 
@@ -80,7 +78,7 @@ public class RenderUtils {
 					mutableBlockPos
 			)) continue;
 
-			renderFace(context, poseStack, vertexConsumer, quads, bitSet, false);
+			renderFace(context, poseStack, vertexConsumer, quads);
 		}
 	}
 
@@ -89,37 +87,41 @@ public class RenderUtils {
 			PoseStack poseStack,
 			VertexConsumer vertexConsumer
 	) {
-		context.random.setSeed(context.seed);
-		List<BakedQuad> quads = context.model.getQuads(context.blockState, null, context.random);
+		List<BakedQuad> quads = quadsForDirection(context.parts, null);
 
 		if (!quads.isEmpty()) {
-			renderFace(context, poseStack, vertexConsumer, quads, new BitSet(3), true);
+			renderFace(context, poseStack, vertexConsumer, quads);
 		}
+	}
+
+	private static List<BakedQuad> quadsForDirection(List<BlockModelPart> parts, Direction direction) {
+		List<BakedQuad> quads = new ArrayList<>();
+		for (BlockModelPart part : parts) {
+			quads.addAll(part.getQuads(direction));
+		}
+		return quads;
 	}
 
 	private static void renderFace(
 			BlockRenderContext context,
 			PoseStack poseStack,
 			VertexConsumer vertexConsumer,
-			List<BakedQuad> quads,
-			BitSet bitSet,
-			boolean isGeneral
+			List<BakedQuad> quads
 	) {
-		int light = isGeneral ? -1 : LevelRenderer.getLightColor(context.level, context.blockState, context.blockPos.above());
-		light = (int) (light * lightningMultiplier);
+		int light = (int) (LevelRenderer.getLightColor(context.level, context.blockPos.above()) * lightningMultiplier);
 
-		context.modelRenderer.renderModelFaceFlat(
-				context.level,
-				context.blockState,
-				context.blockPos,
-				light,
-				DEFAULT_OVERLAY,
-				isGeneral,
-				poseStack,
-				vertexConsumer,
-				quads,
-				bitSet
-		);
+		PoseStack.Pose pose = poseStack.last();
+		for (BakedQuad quad : quads) {
+			float shade = context.level.getShade(quad.direction(), quad.shade());
+			float r = shade, g = shade, b = shade;
+			if (quad.isTinted()) {
+				int color = Minecraft.getInstance().getBlockColors().getColor(context.blockState, context.level, context.blockPos, quad.tintIndex());
+				r *= ((color >> 16) & 0xFF) / 255.0f;
+				g *= ((color >> 8) & 0xFF) / 255.0f;
+				b *= (color & 0xFF) / 255.0f;
+			}
+			vertexConsumer.putBulkData(pose, quad, r, g, b, 1.0f, light, DEFAULT_OVERLAY);
+		}
 	}
 
 	public static void renderBoundingBox(PoseStack poseStack, AABB boundingBox, VertexConsumer buffer) {
@@ -135,24 +137,19 @@ public class RenderUtils {
 	}
 
 	private static class BlockRenderContext {
-		final BlockRenderDispatcher dispatcher;
-		final ModelBlockRenderer modelRenderer;
 		final BlockState blockState;
 		final BlockPos blockPos;
 		final Level level;
-		final RandomSource random;
-		final long seed;
-		final BakedModel model;
+		final List<BlockModelPart> parts;
 
 		BlockRenderContext(BlockRenderDispatcher dispatcher, BlockState blockState, BlockPos blockPos, Level level) {
-			this.dispatcher = dispatcher;
-			this.modelRenderer = dispatcher.getModelRenderer();
 			this.blockState = blockState;
 			this.blockPos = blockPos;
 			this.level = level;
-			this.random = level.getRandom();
-			this.seed = blockState.getSeed(blockPos);
-			this.model = dispatcher.getBlockModel(blockState);
+
+			BlockStateModel model = dispatcher.getBlockModel(blockState);
+			RandomSource random = RandomSource.create(blockState.getSeed(blockPos));
+			this.parts = model.collectParts(random);
 		}
 	}
 }
