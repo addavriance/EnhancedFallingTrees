@@ -33,14 +33,14 @@ issueTrackerURL="https://github.com/addavriance/EnhancedFallingTrees/issues"
 [[dependencies.efallingtrees]]
     modId="neoforge"
     type="required"
-    versionRange="[21.4,21.5)"
+    versionRange="[21.5,21.6)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.efallingtrees]]
     modId="minecraft"
     type="required"
-    versionRange="[1.21.4,1.21.5)"
+    versionRange="[1.21.5,1.21.6)"
     ordering="NONE"
     side="BOTH"
 
