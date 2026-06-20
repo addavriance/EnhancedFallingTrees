@@ -8,6 +8,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -44,7 +45,7 @@ public class NeoForgeNetworkService implements NetworkService {
 
     @Override
     public void sendToServer(ResourceLocation id, FriendlyByteBuf buf) {
-        PacketDistributor.sendToServer(new NeoForgePayload(id, new FriendlyByteBuf(buf.copy())));
+        ClientPacketDistributor.sendToServer(new NeoForgePayload(id, new FriendlyByteBuf(buf.copy())));
     }
 
     @Override
