@@ -7,9 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.RegisterEvent;
 
@@ -23,11 +21,10 @@ public class ForgeRegistrationHelper implements RegistrationHelper {
     private final Map<ResourceLocation, PreparableReloadListener> reloadListeners = new HashMap<>();
     public ForgeRegistrationHelper() {
         // Регистрируем обработчик события RegisterEvent на шине модов
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::onRegister);
+        RegisterEvent.getBus(FMLJavaModLoadingContext.get().getModBusGroup()).addListener(this::onRegister);
 
         // Регистрируем обработчик на обычной шине событий Forge, а не на шине модов
-        MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListener);
+        AddReloadListenerEvent.BUS.addListener(this::onAddReloadListener);
     }
 
     @Override
