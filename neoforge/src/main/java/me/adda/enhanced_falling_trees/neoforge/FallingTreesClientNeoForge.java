@@ -6,7 +6,6 @@ import me.adda.enhanced_falling_trees.config.screen.ConfigScreen;
 import me.adda.enhanced_falling_trees.particles.LeavesParticles;
 import me.adda.enhanced_falling_trees.registry.EntityRegistry;
 import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
-import net.minecraft.client.Minecraft;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -22,10 +21,7 @@ public class FallingTreesClientNeoForge {
     }
 
     public static void onParticleFactory(RegisterParticleProvidersEvent event) {
-        Minecraft.getInstance().particleEngine.register(
-                ParticleRegistry.LEAVES.get(),
-                LeavesParticles.Factory::new
-        );
+        event.registerSpriteSet(ParticleRegistry.LEAVES.get(), LeavesParticles.Factory::new);
     }
 
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {

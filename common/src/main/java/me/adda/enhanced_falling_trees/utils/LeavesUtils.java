@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
@@ -67,7 +68,9 @@ public class LeavesUtils {
         float green = (float) leaves_rgb[1];
         float blue = (float) leaves_rgb[2];
 
-        particle.setColor(red, green, blue);
+        if (particle instanceof SingleQuadParticle quadParticle) {
+            quadParticle.setColor(red, green, blue);
+        }
     }
 
     private static int getLeafColor(Level world, BlockState leavesState, BlockPos leavesPos) {

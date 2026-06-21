@@ -4,15 +4,15 @@ import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.util.RandomSource;
 
-public class LeavesParticles extends TextureSheetParticle {
+public class LeavesParticles extends SingleQuadParticle {
     protected final float maxRotateSpeed;
     protected final int maxRotateTime;
     protected int rotateTime = 0;
 
     public LeavesParticles(ClientLevel world, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
-        super(world, x, y, z, xd, yd, zd);
+        super(world, x, y, z, xd, yd, zd, sprites.first());
 
         this.xd = random.nextGaussian() * 0.09D;
         this.yd = random.nextFloat() * 0.1D;
@@ -51,8 +51,8 @@ public class LeavesParticles extends TextureSheetParticle {
     }
 
     @Override
-    public @NotNull ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    public SingleQuadParticle.Layer getLayer() {
+        return SingleQuadParticle.Layer.TRANSLUCENT;
     }
 
     public static class Factory implements ParticleProvider<SimpleParticleType> {
@@ -65,7 +65,7 @@ public class LeavesParticles extends TextureSheetParticle {
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel world,
                                        double x, double y, double z,
-                                       double xd, double yd, double zd) {
+                                       double xd, double yd, double zd, RandomSource random) {
             return new LeavesParticles(world, x, y, z, xd, yd, zd, sprites);
         }
     }
