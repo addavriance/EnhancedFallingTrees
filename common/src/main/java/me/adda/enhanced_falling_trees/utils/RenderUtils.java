@@ -30,7 +30,7 @@ public class RenderUtils {
 	}
 
 	public static void renderBlock(
-			PoseStack poseStack,
+			PoseStack.Pose pose,
 			BlockState blockState,
 			BlockPos blockPos,
 			Level level,
@@ -44,8 +44,8 @@ public class RenderUtils {
 				level
 		);
 
-		renderBlockFaces(context, poseStack, vertexConsumer, faceRenderCondition);
-		renderBlockGeneral(context, poseStack, vertexConsumer);
+		renderBlockFaces(context, pose, vertexConsumer, faceRenderCondition);
+		renderBlockGeneral(context, pose, vertexConsumer);
 	}
 
 	public static void setLightningMultiplier(float multiplier) {
@@ -58,7 +58,7 @@ public class RenderUtils {
 
 	private static void renderBlockFaces(
 			BlockRenderContext context,
-			PoseStack poseStack,
+			PoseStack.Pose pose,
 			VertexConsumer vertexConsumer,
 			FaceRenderCondition faceRenderCondition
 	) {
@@ -78,19 +78,19 @@ public class RenderUtils {
 					mutableBlockPos
 			)) continue;
 
-			renderFace(context, poseStack, vertexConsumer, quads);
+			renderFace(context, pose, vertexConsumer, quads);
 		}
 	}
 
 	private static void renderBlockGeneral(
 			BlockRenderContext context,
-			PoseStack poseStack,
+			PoseStack.Pose pose,
 			VertexConsumer vertexConsumer
 	) {
 		List<BakedQuad> quads = quadsForDirection(context.parts, null);
 
 		if (!quads.isEmpty()) {
-			renderFace(context, poseStack, vertexConsumer, quads);
+			renderFace(context, pose, vertexConsumer, quads);
 		}
 	}
 
@@ -104,13 +104,12 @@ public class RenderUtils {
 
 	private static void renderFace(
 			BlockRenderContext context,
-			PoseStack poseStack,
+			PoseStack.Pose pose,
 			VertexConsumer vertexConsumer,
 			List<BakedQuad> quads
 	) {
 		int light = (int) (LevelRenderer.getLightColor(context.level, context.blockPos.above()) * lightningMultiplier);
 
-		PoseStack.Pose pose = poseStack.last();
 		for (BakedQuad quad : quads) {
 			float shade = context.level.getShade(quad.direction(), quad.shade());
 			float r = shade, g = shade, b = shade;
@@ -125,7 +124,7 @@ public class RenderUtils {
 	}
 
 	public static void renderBoundingBox(PoseStack poseStack, AABB boundingBox, VertexConsumer buffer) {
-		ShapeRenderer.renderLineBox(poseStack, buffer, boundingBox, 1.0f, 1.0f, 1.0f, 1.0f);
+		ShapeRenderer.renderLineBox(poseStack.last(), buffer, boundingBox, 1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	public static float getDeltaTime() {

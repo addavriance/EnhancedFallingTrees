@@ -77,7 +77,7 @@ public class DefaultTree implements TreeType {
 	}
 
 	private void handleParticles(TreeEntity entity) {
-		if (!(PlatformServices.getPlatform().isClient() && entity.level().isClientSide)) return;
+		if (!(PlatformServices.getPlatform().isClient() && entity.level().isClientSide())) return;
 
 		BlockState leavesState = getParticleBlockState(entity);
 		if (leavesState == null) return;

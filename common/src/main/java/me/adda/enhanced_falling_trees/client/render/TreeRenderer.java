@@ -1,17 +1,17 @@
 package me.adda.enhanced_falling_trees.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.adda.enhanced_falling_trees.api.TreeType;
 import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.utils.GroundUtils;
 import me.adda.enhanced_falling_trees.utils.RenderUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
@@ -63,21 +63,21 @@ public class TreeRenderer extends EntityRenderer<TreeEntity, TreeRenderState> {
 	}
 
 	@Override
-	public void render(TreeRenderState state, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+	public void submit(TreeRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraRenderState) {
 		if (state.treeType == null || state.blocks == null || state.blocks.isEmpty()) return;
 
 		poseStack.pushPose();
 		try {
-			renderTree(state, poseStack, buffer);
+			renderTree(state, poseStack, collector);
 		} finally {
 			poseStack.popPose();
 		}
 	}
 
-	private void renderTree(TreeRenderState state, PoseStack poseStack, MultiBufferSource buffer) {
+	private void renderTree(TreeRenderState state, PoseStack poseStack, SubmitNodeCollector collector) {
 		applyTreeTransformations(poseStack, state.blocks, state.treeType, state.direction, state.totalAnimation);
 
-		renderTreeBlocks(state, poseStack, buffer);
+		renderTreeBlocks(state, poseStack, collector);
 	}
 
 	private record AnimationParameters(float fallAnim, float bounceAnim, float totalAnimation, float targetAngle) {
@@ -174,21 +174,20 @@ public class TreeRenderer extends EntityRenderer<TreeEntity, TreeRenderState> {
 		poseStack.mulPose(rotation);
 	}
 
-	private void renderTreeBlocks(TreeRenderState state, PoseStack poseStack, MultiBufferSource buffer) {
-		VertexConsumer consumer = buffer.getBuffer(RenderType.cutout());
-
-		state.blocks.forEach((blockPos, blockState) -> renderBlock(state, poseStack, consumer, blockPos, blockState));
+	private void renderTreeBlocks(TreeRenderState state, PoseStack poseStack, SubmitNodeCollector collector) {
+		state.blocks.forEach((blockPos, blockState) -> renderBlock(state, poseStack, collector, blockPos, blockState));
 	}
 
-	private void renderBlock(TreeRenderState state, PoseStack poseStack, VertexConsumer consumer,
+	private void renderBlock(TreeRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
 							 BlockPos blockPos, BlockState blockState) {
 		poseStack.pushPose();
 		try {
 			poseStack.translate(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 
-			RenderUtils.renderBlock(poseStack, blockState, blockPos.offset(state.originPos),
-					state.level, consumer, (s, level, offset, face, pos) ->
-							shouldRenderFace(s, state.blocks, blockPos, face));
+			collector.submitCustomGeometry(poseStack, RenderType.cutout(), (pose, consumer) ->
+					RenderUtils.renderBlock(pose, blockState, blockPos.offset(state.originPos),
+							state.level, consumer, (s, level, offset, face, pos) ->
+									shouldRenderFace(s, state.blocks, blockPos, face)));
 		} finally {
 			poseStack.popPose();
 		}
