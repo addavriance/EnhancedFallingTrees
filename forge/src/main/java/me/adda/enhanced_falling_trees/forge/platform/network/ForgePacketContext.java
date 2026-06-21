@@ -21,8 +21,8 @@ public class ForgePacketContext implements PacketContext {
 
     @Override
     public void execute(Runnable action) {
-        if (sender != null && sender.getServer() != null) {
-            sender.getServer().execute(action);
+        if (sender != null && sender.level().getServer() != null) {
+            sender.level().getServer().execute(action);
         } else {
             action.run();
         }

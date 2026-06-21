@@ -21,7 +21,7 @@ public class FallingTreesNeoForge {
         ParticleRegistry.initialize();
         FallingTrees.init();
 
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             modEventBus.addListener(FallingTreesClientNeoForge::clientInit);
             modEventBus.addListener(FallingTreesClientNeoForge::onParticleFactory);
             modEventBus.addListener(FallingTreesClientNeoForge::onRegisterRenderers);

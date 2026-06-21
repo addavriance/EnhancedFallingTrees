@@ -20,8 +20,8 @@ public class NeoForgePacketContext implements PacketContext {
 
     @Override
     public void execute(Runnable action) {
-        if (isServer && player instanceof ServerPlayer sp && sp.getServer() != null) {
-            sp.getServer().execute(action);
+        if (isServer && player instanceof ServerPlayer sp && sp.level().getServer() != null) {
+            sp.level().getServer().execute(action);
         } else {
             action.run();
         }

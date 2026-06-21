@@ -12,7 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.PreparableReloadListener.SharedState;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,8 +46,8 @@ public class FabricRegistrationHelper implements RegistrationHelper {
             }
 
             @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor) {
-                return listener.reload(preparationBarrier, resourceManager, backgroundExecutor, gameExecutor);
+            public CompletableFuture<Void> reload(SharedState sharedState, Executor backgroundExecutor, PreparationBarrier preparationBarrier, Executor gameExecutor) {
+                return listener.reload(sharedState, backgroundExecutor, preparationBarrier, gameExecutor);
             }
 
             @Override
