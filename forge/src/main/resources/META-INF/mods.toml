@@ -25,13 +25,13 @@ issueTrackerURL="https://github.com/addavriance/EnhancedFallingTrees/issues"
 [[dependencies.efallingtrees]]
    modId="forge"
    mandatory=true
-   versionRange="[59,60)"
+   versionRange="[60,61)"
    ordering="NONE"
    side="BOTH"
 [[dependencies.efallingtrees]]
    modId="minecraft"
    mandatory=true
-   versionRange="[1.21.9,1.21.10)"
+   versionRange="[1.21.10,1.21.11)"
    ordering="NONE"
    side="BOTH"
 [[dependencies.efallingtrees]]
