@@ -2,7 +2,7 @@ package me.adda.enhanced_falling_trees.utils;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,7 +28,7 @@ public class TextureCache {
         }
     }
 
-    public static final ConcurrentHashMap<ResourceLocation, Data> INST = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<Identifier, Data> INST = new ConcurrentHashMap<>();
 
     private TextureCache() {}
 

@@ -9,7 +9,7 @@ import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.PreparableReloadListener.SharedState;
@@ -30,7 +30,7 @@ public class FabricRegistrationHelper implements RegistrationHelper {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> void registerNewRegistry(Registry<T> registry) {
-        ResourceLocation registryName = registry.key().location();
+        Identifier registryName = registry.key().identifier();
         if (BuiltInRegistries.REGISTRY.containsKey(registryName))
             throw new IllegalStateException("Attempted duplicate registration of registry " + registryName);
 
@@ -38,10 +38,10 @@ public class FabricRegistrationHelper implements RegistrationHelper {
     }
 
     @Override
-    public void registerReloadListener(PackType packType, PreparableReloadListener listener, ResourceLocation id, List<ResourceLocation> dependencies) {
+    public void registerReloadListener(PackType packType, PreparableReloadListener listener, Identifier id, List<Identifier> dependencies) {
         ResourceManagerHelper.get(packType).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override
-            public ResourceLocation getFabricId() {
+            public Identifier getFabricId() {
                 return id;
             }
 
@@ -51,7 +51,7 @@ public class FabricRegistrationHelper implements RegistrationHelper {
             }
 
             @Override
-            public Collection<ResourceLocation> getFabricDependencies() {
+            public Collection<Identifier> getFabricDependencies() {
                 return dependencies;
             }
 

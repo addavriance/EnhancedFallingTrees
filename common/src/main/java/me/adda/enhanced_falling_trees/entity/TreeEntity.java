@@ -11,7 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -88,7 +88,7 @@ public class TreeEntity extends Entity {
 		this.getEntityData().set(USED_TOOL, itemStack);
 		this.getEntityData().set(ANGLE, 0f);
 		this.getEntityData().set(TARGET_ANGLE, 0f);
-		ResourceLocation treeTypeLocation = TreeRegistry.getTreeTypeLocation(treeType);
+		Identifier treeTypeLocation = TreeRegistry.getTreeTypeLocation(treeType);
 		if (treeTypeLocation != null)
 			this.getEntityData().set(TREE_TYPE_LOCATION, treeTypeLocation.toString());
 		this.getEntityData().set(FALL_DIRECTION, Direction.fromYRot(
@@ -196,7 +196,7 @@ public class TreeEntity extends Entity {
 	}
 
 	public TreeType getTreeType() {
-		Optional<TreeType> treeTypeOptional = TreeRegistry.getTreeType(ResourceLocation.parse(this.getEntityData().get(TREE_TYPE_LOCATION)));
+		Optional<TreeType> treeTypeOptional = TreeRegistry.getTreeType(Identifier.parse(this.getEntityData().get(TREE_TYPE_LOCATION)));
 		return treeTypeOptional.orElse(null);
 	}
 

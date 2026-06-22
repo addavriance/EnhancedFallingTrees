@@ -6,7 +6,7 @@ import me.adda.enhanced_falling_trees.api.platform.registry.DeferredObject;
 import net.minecraft.core.Registry;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.neoforged.bus.api.IEventBus;
@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 public class NeoForgeRegistrationHelper implements RegistrationHelper {
     private static IEventBus EVENT_BUS;
     private static final Map<DeferredObject<?>, Supplier<?>> ENTRIES = new HashMap<>();
-    private static final Map<ResourceLocation, PreparableReloadListener> RELOAD_LISTENERS = new HashMap<>();
+    private static final Map<Identifier, PreparableReloadListener> RELOAD_LISTENERS = new HashMap<>();
     private static DeferredRegister<EntityDataSerializer<?>> DATA_SERIALIZERS;
 
     public static void setEventBus(IEventBus bus) {
@@ -36,7 +36,7 @@ public class NeoForgeRegistrationHelper implements RegistrationHelper {
     }
 
     @Override
-    public void registerEntityDataSerializer(ResourceLocation id, EntityDataSerializer<?> serializer) {
+    public void registerEntityDataSerializer(Identifier id, EntityDataSerializer<?> serializer) {
         DATA_SERIALIZERS.register(id.getPath(), () -> serializer);
     }
 
@@ -51,7 +51,7 @@ public class NeoForgeRegistrationHelper implements RegistrationHelper {
     }
 
     @Override
-    public void registerReloadListener(PackType packType, PreparableReloadListener listener, ResourceLocation id, List<ResourceLocation> dependencies) {
+    public void registerReloadListener(PackType packType, PreparableReloadListener listener, Identifier id, List<Identifier> dependencies) {
         if (packType == PackType.SERVER_DATA) {
             RELOAD_LISTENERS.put(id, listener);
         }

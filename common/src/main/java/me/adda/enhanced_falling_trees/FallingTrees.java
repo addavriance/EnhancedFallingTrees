@@ -12,7 +12,7 @@ import me.adda.enhanced_falling_trees.utils.BlockMapEntityData;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 public class FallingTrees {
@@ -29,7 +29,7 @@ public class FallingTrees {
 		PlatformTest.testPlatform();
 
 		PlatformServices.REGISTRATION.registerEntityDataSerializer(
-				ResourceLocation.fromNamespaceAndPath(MOD_ID, "block_map"), BlockMapEntityData.BLOCK_MAP);
+				Identifier.fromNamespaceAndPath(MOD_ID, "block_map"), BlockMapEntityData.BLOCK_MAP);
 	}
 
 	public static final EntityDataAccessor<Boolean> PLAYER_CLIENT_CONFIG =

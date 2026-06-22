@@ -3,7 +3,7 @@ package me.adda.enhanced_falling_trees.forge.platform.network;
 import me.adda.enhanced_falling_trees.api.platform.network.NetworkService;
 import me.adda.enhanced_falling_trees.api.platform.network.PacketContext;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.PacketDistributor;
@@ -15,10 +15,10 @@ import java.util.function.BiConsumer;
 
 public class ForgeNetworkService implements NetworkService {
     private static final int PROTOCOL_VERSION = 1;
-    private final Map<ResourceLocation, SimpleChannel> channels = new HashMap<>();
+    private final Map<Identifier, SimpleChannel> channels = new HashMap<>();
 
     @Override
-    public void registerClientToServerPacket(ResourceLocation id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
+    public void registerClientToServerPacket(Identifier id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
         SimpleChannel channel = getOrCreateChannel(id);
 
         System.out.println("c2s: " + id);
@@ -35,7 +35,7 @@ public class ForgeNetworkService implements NetworkService {
     }
 
     @Override
-    public void registerServerToClientPacket(ResourceLocation id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
+    public void registerServerToClientPacket(Identifier id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
         SimpleChannel channel = getOrCreateChannel(id);
 
         System.out.println("s2c: " + id);
@@ -51,24 +51,24 @@ public class ForgeNetworkService implements NetworkService {
     }
 
     @Override
-    public void sendToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf buf) {
+    public void sendToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf buf) {
         SimpleChannel channel = getOrCreateChannel(id);
         channel.send(new S2CBufferWrapper(buf), PacketDistributor.PLAYER.with(player));
     }
 
     @Override
-    public void sendToServer(ResourceLocation id, FriendlyByteBuf buf) {
+    public void sendToServer(Identifier id, FriendlyByteBuf buf) {
         SimpleChannel channel = getOrCreateChannel(id);
         channel.send(new C2SBufferWrapper(buf), PacketDistributor.SERVER.noArg());
     }
 
     @Override
-    public void sendToAll(ResourceLocation id, FriendlyByteBuf buf) {
+    public void sendToAll(Identifier id, FriendlyByteBuf buf) {
         SimpleChannel channel = getOrCreateChannel(id);
         channel.send(new S2CBufferWrapper(buf), PacketDistributor.ALL.noArg());
     }
 
-    private SimpleChannel getOrCreateChannel(ResourceLocation id) {
+    private SimpleChannel getOrCreateChannel(Identifier id) {
         return channels.computeIfAbsent(id, resourceLocation ->
                 ChannelBuilder.named(id)
                         .networkProtocolVersion(PROTOCOL_VERSION)

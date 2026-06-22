@@ -5,7 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Supplier;
 
@@ -52,8 +52,8 @@ public class DeferredObject<T> implements Supplier<T> {
         return BuiltInRegistries.REGISTRY.getValue(getKey().registry());
     }
 
-    public ResourceLocation getId() {
-        return getKey().location();
+    public Identifier getId() {
+        return getKey().identifier();
     }
 
     public boolean isBound() {

@@ -7,7 +7,7 @@ import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FallingTreesFabric implements ModInitializer {
     @Override
@@ -23,11 +23,11 @@ public class FallingTreesFabric implements ModInitializer {
 
     private void registerPayloadTypes() {
         // Регистрируем все типы пакетов, которые будут использоваться
-        registerPayloadType(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet"));
+        registerPayloadType(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet"));
         // Добавьте здесь другие типы пакетов по мере необходимости
     }
 
-    private void registerPayloadType(ResourceLocation id) {
+    private void registerPayloadType(Identifier id) {
         PayloadTypeRegistry.playS2C().register(
                 FallingTreesPayload.getType(id),
                 FallingTreesPayload.codec(id)

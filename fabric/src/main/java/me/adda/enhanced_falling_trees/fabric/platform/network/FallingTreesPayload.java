@@ -5,16 +5,16 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public record FallingTreesPayload(ResourceLocation id, ByteBuf data) implements CustomPacketPayload {
-    private static final Map<ResourceLocation, Type<?>> TYPES = new HashMap<>();
+public record FallingTreesPayload(Identifier id, ByteBuf data) implements CustomPacketPayload {
+    private static final Map<Identifier, Type<?>> TYPES = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public static <T extends FallingTreesPayload> Type<T> getType(ResourceLocation id) {
+    public static <T extends FallingTreesPayload> Type<T> getType(Identifier id) {
         return (Type<T>) TYPES.computeIfAbsent(id, Type::new);
     }
 
@@ -23,7 +23,7 @@ public record FallingTreesPayload(ResourceLocation id, ByteBuf data) implements 
         return getType(id);
     }
 
-    public static StreamCodec<FriendlyByteBuf, FallingTreesPayload> codec(ResourceLocation id) {
+    public static StreamCodec<FriendlyByteBuf, FallingTreesPayload> codec(Identifier id) {
         return StreamCodec.of(
                 // Encoder - тут всё остаётся как есть
                 (buf, payload) -> {

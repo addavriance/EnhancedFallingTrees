@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -18,10 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class FabricNetworkService implements NetworkService {
-    private final Map<ResourceLocation, BiConsumer<FriendlyByteBuf, PacketContext>> serverHandlers = new ConcurrentHashMap<>();
+    private final Map<Identifier, BiConsumer<FriendlyByteBuf, PacketContext>> serverHandlers = new ConcurrentHashMap<>();
 
     // S2C handlers stored here during init, registered in onInitializeClient
-    private static final Map<ResourceLocation, BiConsumer<FriendlyByteBuf, PacketContext>> PENDING_S2C = new LinkedHashMap<>();
+    private static final Map<Identifier, BiConsumer<FriendlyByteBuf, PacketContext>> PENDING_S2C = new LinkedHashMap<>();
 
     private static MinecraftServer SERVER;
 
@@ -35,7 +35,7 @@ public class FabricNetworkService implements NetworkService {
     }
 
     @Override
-    public void registerClientToServerPacket(ResourceLocation id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
+    public void registerClientToServerPacket(Identifier id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
         CustomPacketPayload.Type<FallingTreesPayload> type = FallingTreesPayload.getType(id);
 
         ServerPlayNetworking.registerGlobalReceiver(type, (payload, context) -> {
@@ -46,7 +46,7 @@ public class FabricNetworkService implements NetworkService {
     }
 
     @Override
-    public void registerServerToClientPacket(ResourceLocation id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
+    public void registerServerToClientPacket(Identifier id, BiConsumer<FriendlyByteBuf, PacketContext> handler) {
         // Defer actual registration to onInitializeClient — Fabric 0.97+ requires
         // ClientPlayNetworking.registerGlobalReceiver to be called from the client entrypoint
         PENDING_S2C.put(id, handler);
@@ -63,21 +63,21 @@ public class FabricNetworkService implements NetworkService {
     }
 
     @Override
-    public void sendToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf buf) {
+    public void sendToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf buf) {
         CustomPacketPayload.Type<FallingTreesPayload> type = FallingTreesPayload.getType(id);
         FallingTreesPayload payload = new FallingTreesPayload(id, buf.copy());
         ServerPlayNetworking.send(player, payload);
     }
 
     @Override
-    public void sendToServer(ResourceLocation id, FriendlyByteBuf buf) {
+    public void sendToServer(Identifier id, FriendlyByteBuf buf) {
         CustomPacketPayload.Type<FallingTreesPayload> type = FallingTreesPayload.getType(id);
         FallingTreesPayload payload = new FallingTreesPayload(id, buf.copy());
         ClientPlayNetworking.send(payload);
     }
 
     @Override
-    public void sendToAll(ResourceLocation id, FriendlyByteBuf buf) {
+    public void sendToAll(Identifier id, FriendlyByteBuf buf) {
         CustomPacketPayload.Type<FallingTreesPayload> type = FallingTreesPayload.getType(id);
         FallingTreesPayload payload = new FallingTreesPayload(id, buf.copy());
 

@@ -7,16 +7,16 @@ import me.adda.enhanced_falling_trees.trees.BambooTree;
 import me.adda.enhanced_falling_trees.trees.CactusTree;
 import me.adda.enhanced_falling_trees.trees.ChorusTree;
 import me.adda.enhanced_falling_trees.trees.DefaultTree;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Supplier;
 
 public class TreeTypeRegistry {
 
-	public static final Supplier<TreeType> DEFAULT = TreeRegistry.register(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "default"), DefaultTree::new);
-	public static final Supplier<TreeType> CACTUS = TreeRegistry.register(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "cactus"), CactusTree::new);
-	public static final Supplier<TreeType> BAMBOO = TreeRegistry.register(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "bamboo"), BambooTree::new);
-	public static final Supplier<TreeType> CHORUS = TreeRegistry.register(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "chorus"), ChorusTree::new);
+	public static final Supplier<TreeType> DEFAULT = TreeRegistry.register(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "default"), DefaultTree::new);
+	public static final Supplier<TreeType> CACTUS = TreeRegistry.register(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "cactus"), CactusTree::new);
+	public static final Supplier<TreeType> BAMBOO = TreeRegistry.register(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "bamboo"), BambooTree::new);
+	public static final Supplier<TreeType> CHORUS = TreeRegistry.register(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "chorus"), ChorusTree::new);
 	
 	public static void register() {
 	}

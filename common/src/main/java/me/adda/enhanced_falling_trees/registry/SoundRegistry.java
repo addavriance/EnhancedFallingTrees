@@ -4,7 +4,7 @@ import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.api.platform.registry.DeferredObject;
 import me.adda.enhanced_falling_trees.api.platform.registry.DeferredRegister;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 
 public class SoundRegistry {
@@ -12,17 +12,17 @@ public class SoundRegistry {
 			DeferredRegister.create(FallingTrees.MOD_ID, Registries.SOUND_EVENT);
 
 	public static final DeferredObject<SoundEvent> TREE_FALL = SOUNDS.register("tree_fall", () ->
-			SoundEvent.createFixedRangeEvent(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "tree_fall"), 5));
+			SoundEvent.createFixedRangeEvent(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "tree_fall"), 5));
 	public static final DeferredObject<SoundEvent> TREE_IMPACT = SOUNDS.register("tree_impact", () ->
-			SoundEvent.createFixedRangeEvent(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "tree_impact"), 5));
+			SoundEvent.createFixedRangeEvent(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "tree_impact"), 5));
 	public static final DeferredObject<SoundEvent> CACTUS_FALL = SOUNDS.register("cactus_fall", () ->
-			SoundEvent.createFixedRangeEvent(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "cactus_fall"), 5));
+			SoundEvent.createFixedRangeEvent(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "cactus_fall"), 5));
 	public static final DeferredObject<SoundEvent> CACTUS_IMPACT = SOUNDS.register("cactus_impact", () ->
-			SoundEvent.createFixedRangeEvent(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "cactus_impact"), 5));
+			SoundEvent.createFixedRangeEvent(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "cactus_impact"), 5));
 	public static final DeferredObject<SoundEvent> BAMBOO_IMPACT = SOUNDS.register("bamboo_impact", () ->
-			SoundEvent.createFixedRangeEvent(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "bamboo_impact"), 5));
+			SoundEvent.createFixedRangeEvent(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "bamboo_impact"), 5));
 	public static final DeferredObject<SoundEvent> BAMBOO_FALL = SOUNDS.register("bamboo_fall", () ->
-			SoundEvent.createFixedRangeEvent(ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "bamboo_fall"), 5));
+			SoundEvent.createFixedRangeEvent(Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "bamboo_fall"), 5));
 
 	public static void initialize() {
 		SOUNDS.register();

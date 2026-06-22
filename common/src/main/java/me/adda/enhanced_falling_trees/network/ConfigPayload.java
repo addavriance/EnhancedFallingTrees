@@ -6,10 +6,10 @@ import me.adda.enhanced_falling_trees.config.CommonConfig;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public record ConfigPayload(String configData) implements CustomPacketPayload {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet");
     public static final Type<ConfigPayload> TYPE = new Type<>(ID);
 
     @Override

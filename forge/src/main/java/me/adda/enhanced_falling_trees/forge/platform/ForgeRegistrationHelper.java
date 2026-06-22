@@ -4,7 +4,7 @@ import me.adda.enhanced_falling_trees.api.platform.RegistrationHelper;
 import me.adda.enhanced_falling_trees.api.platform.registry.DeferredObject;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 
 public class ForgeRegistrationHelper implements RegistrationHelper {
     private final Map<DeferredObject<?>, Supplier<?>> entries = new HashMap<>();
-    private final Map<ResourceLocation, PreparableReloadListener> reloadListeners = new HashMap<>();
+    private final Map<Identifier, PreparableReloadListener> reloadListeners = new HashMap<>();
     public ForgeRegistrationHelper() {
         // Регистрируем обработчик события RegisterEvent на шине модов
         RegisterEvent.getBus(FMLJavaModLoadingContext.get().getModBusGroup()).addListener(this::onRegister);
@@ -38,7 +38,7 @@ public class ForgeRegistrationHelper implements RegistrationHelper {
     }
 
     @Override
-    public void registerReloadListener(PackType packType, PreparableReloadListener listener, ResourceLocation id, List<ResourceLocation> dependencies) {
+    public void registerReloadListener(PackType packType, PreparableReloadListener listener, Identifier id, List<Identifier> dependencies) {
         // В Forge мы обрабатываем это через событие AddReloadListenerEvent
         if (packType == PackType.SERVER_DATA) {
             reloadListeners.put(id, listener);

@@ -4,7 +4,7 @@ package me.adda.enhanced_falling_trees.api.platform.registry;
 import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,7 +16,7 @@ public class DeferredRegister<T> {
     private final ResourceKey<? extends Registry<T>> registryKey;
     private final Map<DeferredObject<? extends T>, Supplier<? extends T>> entries = new ConcurrentHashMap<>();
 
-    public static <T> DeferredRegister<T> create(String namespace, ResourceLocation registryLocation) {
+    public static <T> DeferredRegister<T> create(String namespace, Identifier registryLocation) {
         return create(namespace, ResourceKey.createRegistryKey(registryLocation));
     }
 
@@ -34,19 +34,19 @@ public class DeferredRegister<T> {
     }
 
     public <R extends T> DeferredObject<R> register(String name, Function<ResourceKey<T>, R> registryFunc) {
-        return register(ResourceLocation.fromNamespaceAndPath(namespace, name), registryFunc);
+        return register(Identifier.fromNamespaceAndPath(namespace, name), registryFunc);
     }
 
     public <R extends T> DeferredObject<R> register(String name, Supplier<R> registrySup) {
-        return register(ResourceLocation.fromNamespaceAndPath(namespace, name), registrySup);
+        return register(Identifier.fromNamespaceAndPath(namespace, name), registrySup);
     }
 
-    public <R extends T> DeferredObject<R> register(ResourceLocation name, Function<ResourceKey<T>, R> registryFunc) {
+    public <R extends T> DeferredObject<R> register(Identifier name, Function<ResourceKey<T>, R> registryFunc) {
         ResourceKey<T> key = ResourceKey.create(registryKey, name);
         return register(key, () -> registryFunc.apply(key));
     }
 
-    public <R extends T> DeferredObject<R> register(ResourceLocation name, Supplier<R> registrySup) {
+    public <R extends T> DeferredObject<R> register(Identifier name, Supplier<R> registrySup) {
         return register(ResourceKey.create(registryKey, name), registrySup);
     }
 

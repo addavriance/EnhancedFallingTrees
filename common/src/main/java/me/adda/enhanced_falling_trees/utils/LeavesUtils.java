@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -61,7 +61,7 @@ public class LeavesUtils {
                 : quads.get(0).sprite();
         boolean shouldColor = quads.isEmpty() || quads.stream().anyMatch(BakedQuad::isTinted);
 
-        ResourceLocation texture = spriteToTexture(sprite);
+        Identifier texture = spriteToTexture(sprite);
         double[] leaves_rgb = calculateLeafColor(texture, shouldColor, leafColor);
 
         float red = (float) leaves_rgb[0];
@@ -81,7 +81,7 @@ public class LeavesUtils {
         }
     }
 
-    private static double[] calculateLeafColor(ResourceLocation texture, boolean shouldColor, int blockColor) {
+    private static double[] calculateLeafColor(Identifier texture, boolean shouldColor, int blockColor) {
         Resource res = client.getResourceManager().getResource(texture).orElse(null);
         if (res == null) return new double[] {1, 1, 1};
 
@@ -134,8 +134,8 @@ public class LeavesUtils {
         };
     }
 
-    public static ResourceLocation spriteToTexture(TextureAtlasSprite sprite) {
+    public static Identifier spriteToTexture(TextureAtlasSprite sprite) {
         String texture = sprite.contents().name().getPath();
-        return ResourceLocation.fromNamespaceAndPath(sprite.contents().name().getNamespace(), "textures/" + texture + ".png");
+        return Identifier.fromNamespaceAndPath(sprite.contents().name().getNamespace(), "textures/" + texture + ".png");
     }
 }

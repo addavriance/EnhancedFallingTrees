@@ -3,10 +3,10 @@ package me.adda.enhanced_falling_trees.network;
 import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.api.platform.PlatformServices;
 import me.adda.enhanced_falling_trees.api.platform.network.NetworkServices;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class PacketHandler {
-	public static final ResourceLocation CONFIG_PACKET_ID = ResourceLocation.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet");
+	public static final Identifier CONFIG_PACKET_ID = Identifier.fromNamespaceAndPath(FallingTrees.MOD_ID, "config_packet");
 
 	public static void register() {
 		if (PlatformServices.getPlatform().isClient()) {

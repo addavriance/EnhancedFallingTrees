@@ -2,7 +2,7 @@ package me.adda.enhanced_falling_trees.config.common;
 
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -45,7 +45,7 @@ public class FilterConfig {
 		}
 
 		public boolean isValid(Block block) {
-			ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(block);
+			Identifier blockId = BuiltInRegistries.BLOCK.getKey(block);
 			String blockName = blockId.toString();
 
 			if (blacklistedBlocks.contains(blockName))
