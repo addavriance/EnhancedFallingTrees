@@ -7,11 +7,14 @@ import me.adda.enhanced_falling_trees.utils.GroundUtils;
 import me.adda.enhanced_falling_trees.utils.RenderUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
@@ -184,23 +187,20 @@ public class TreeRenderer extends EntityRenderer<TreeEntity, TreeRenderState> {
 		try {
 			poseStack.translate(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 
-			collector.submitCustomGeometry(poseStack, RenderType.cutout(), (pose, consumer) ->
-					RenderUtils.renderBlock(pose, blockState, blockPos.offset(state.originPos),
-							state.level, consumer, (s, level, offset, face, pos) ->
-									shouldRenderFace(s, state.blocks, blockPos, face)));
+			BlockPos worldBlockPos = blockPos.offset(state.originPos);
+			int color = Minecraft.getInstance().getBlockColors().getColor(blockState, state.level, worldBlockPos, 0);
+			float r = ((color >> 16) & 0xFF) / 255.0f;
+			float g = ((color >> 8) & 0xFF) / 255.0f;
+			float b = (color & 0xFF) / 255.0f;
+
+			BlockStateModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(blockState);
+			int light = RenderUtils.scaleLight(state.lightCoords);
+
+			collector.submitBlockModel(poseStack, ItemBlockRenderTypes.getRenderType(blockState), model,
+					r, g, b, light, OverlayTexture.NO_OVERLAY, 0);
 		} finally {
 			poseStack.popPose();
 		}
-	}
-
-	private boolean shouldRenderFace(BlockState state, Map<BlockPos, BlockState> blocks,
-									 BlockPos pos, Direction face) {
-		if (!state.canOcclude()) return true;
-
-		BlockPos facePos = pos.offset(face.getUnitVec3i());
-		if (!blocks.containsKey(facePos)) return true;
-
-		return !state.is(blocks.get(facePos).getBlock());
 	}
 
 	private int calculateTreeDistance(Map<BlockPos, BlockState> blocks, Direction direction, TreeType treeType) {
