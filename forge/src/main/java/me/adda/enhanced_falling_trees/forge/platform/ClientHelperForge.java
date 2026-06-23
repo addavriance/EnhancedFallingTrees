@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ public class ClientHelperForge implements ClientHelper {
     private final List<RendererEntry<?>> renderers = new ArrayList<>();
 
     public ClientHelperForge() {
-        EntityRenderersEvent.RegisterRenderers.getBus(FMLJavaModLoadingContext.get().getModBusGroup()).addListener(this::onRegisterRenderers);
+        EntityRenderersEvent.RegisterRenderers.BUS.addListener(this::onRegisterRenderers);
     }
 
     @Override

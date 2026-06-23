@@ -28,12 +28,12 @@ public class FallingTreesFabric implements ModInitializer {
     }
 
     private void registerPayloadType(Identifier id) {
-        PayloadTypeRegistry.playS2C().register(
+        PayloadTypeRegistry.clientboundPlay().register(
                 FallingTreesPayload.getType(id),
                 FallingTreesPayload.codec(id)
         );
 
-        PayloadTypeRegistry.playC2S().register(
+        PayloadTypeRegistry.serverboundPlay().register(
                 FallingTreesPayload.getType(id),
                 FallingTreesPayload.codec(id)
         );

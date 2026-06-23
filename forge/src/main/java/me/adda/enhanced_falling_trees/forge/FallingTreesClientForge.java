@@ -14,7 +14,6 @@ import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod.EventBusSubscriber(modid = FallingTrees.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class FallingTreesClientForge {
@@ -22,8 +21,7 @@ public class FallingTreesClientForge {
 		// EntityRenderersEvent.RegisterRenderers and RegisterParticleProvidersEvent are no longer
 		// IModBusEvent as of 1.21.9 forge, so @SubscribeEvent annotation scanning can't pick them up anymore.
 		RegisterParticleProvidersEvent.BUS.addListener(FallingTreesClientForge::onParticleFactoryRegistration);
-		EntityRenderersEvent.RegisterRenderers.getBus(FMLJavaModLoadingContext.get().getModBusGroup())
-				.addListener(FallingTreesClientForge::onRegisterRenderers);
+		EntityRenderersEvent.RegisterRenderers.BUS.addListener(FallingTreesClientForge::onRegisterRenderers);
 	}
 
 	@SubscribeEvent

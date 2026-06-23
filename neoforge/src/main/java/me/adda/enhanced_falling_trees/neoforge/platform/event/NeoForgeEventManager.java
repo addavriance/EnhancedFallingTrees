@@ -8,7 +8,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 
 public class NeoForgeEventManager implements EventManager {
     private static IEventBus MOD_EVENT_BUS;
@@ -19,7 +19,7 @@ public class NeoForgeEventManager implements EventManager {
 
     @Override
     public void registerBlockBreakEvent(BlockBreakCallback callback) {
-        NeoForge.EVENT_BUS.addListener((BlockEvent.BreakEvent event) -> {
+        NeoForge.EVENT_BUS.addListener((BreakBlockEvent event) -> {
             EventResult result = callback.onBlockBreak(
                     (Level) event.getLevel(),
                     event.getPos(),
