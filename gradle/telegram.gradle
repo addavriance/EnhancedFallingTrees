@@ -20,7 +20,7 @@ tasks.register('sendToTelegram') {
         println "Sending artifacts to Telegram..."
 
         ['fabric', 'forge', 'neoforge'].each { modType ->
-            def jarName = "${archivesBaseName}-${mod_version}-${minecraft_version}+${modType}.jar"
+            def jarName = "${archives_base_name}-${mod_version}-${minecraft_version}+${modType}.jar"
             def jarFile = file("${modType}/build/libs/${jarName}")
 
             if (jarFile.exists()) {
@@ -38,14 +38,12 @@ tasks.register('sendToTelegram') {
                 tempFile.deleteOnExit()
                 tempFile.text = caption
 
-                exec {
-                    commandLine 'curl', '-sS', '-o', '/dev/null', '-X', 'POST',
-                            '-F', "chat_id=${chatId}",
-                            '-F', "document=@${jarFile.absolutePath}",
-                            '-F', "caption=<${tempFile.absolutePath}",
-                            "https://api.telegram.org/bot${botToken}/sendDocument"
-                    ignoreExitValue true
-                }
+                new ProcessBuilder('curl', '-sS', '-o', '/dev/null', '-X', 'POST',
+                        '-F', "chat_id=${chatId}",
+                        '-F', "document=@${jarFile.absolutePath}",
+                        '-F', "caption=<${tempFile.absolutePath}",
+                        "https://api.telegram.org/bot${botToken}/sendDocument")
+                        .inheritIO().start().waitFor()
 
                 println "✅ ${jarName} sent"
             } else {
@@ -61,9 +59,9 @@ tasks.register('buildAndSend') {
     description = 'Builds all platforms and sends JARs to Telegram'
     group = 'distribution'
 
-    dependsOn ':fabric:remapJar'
-    dependsOn ':forge:remapJar'
-    dependsOn ':neoforge:remapJar'
+    dependsOn ':fabric:build'
+    dependsOn ':forge:build'
+    dependsOn ':neoforge:build'
 
     finalizedBy 'sendToTelegram'
 }

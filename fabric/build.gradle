@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.gradleup.shadow" version "9.2.2"
 }
 
 architectury {
@@ -20,17 +20,17 @@ configurations {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
     // Remove the next line if you don't want to depend on the API
-    // modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
+    // api "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
-    modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_version}")
-    modApi("com.terraformersmc:modmenu:${rootProject.modmenu_version}")
+    api("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_version}")
+    api("com.terraformersmc:modmenu:${rootProject.modmenu_version}")
 
-    modCompileOnly("maven.modrinth:jade:${rootProject.jade_version}+fabric-fabric,${rootProject.jade_minecraft_version}")
+    compileOnly("maven.modrinth:jade:${rootProject.jade_version}+fabric-fabric,${rootProject.jade_minecraft_version}")
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 }
 
@@ -50,13 +50,6 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set("dev-shadow")
-}
-
-remapJar {
-    injectAccessWidener = true
-    inputFile.set shadowJar.archiveFile
-    dependsOn shadowJar
     archiveClassifier.set(null)
 }
 

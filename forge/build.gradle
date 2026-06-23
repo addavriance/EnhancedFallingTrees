@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.gradleup.shadow" version "9.2.2"
 }
 architectury {
     platformSetupLoomIde()
@@ -10,9 +10,6 @@ loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
     forge {
-        convertAccessWideners = true
-        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-
         mixinConfig "efallingtrees-common.mixins.json"
         mixinConfig "efallingtrees.mixins.json"
     }
@@ -29,14 +26,14 @@ configurations {
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
     // Remove the next line if you don't want to depend on the API
-//    modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+//    api "dev.architectury:architectury-forge:${rootProject.architectury_version}"
 
     // No official cloth-config-forge build exists for 1.21.5+, so we vendor a local build from ClothConfigApiForgePort.
-    modApi files("libs/cloth-config-21.11.153-forge.jar")
+    api files("libs/cloth-config-26.1.154.jar")
 
-//    modCompileOnly("maven.modrinth:jade:${rootProject.jade_version}+forge-forge,${rootProject.jade_minecraft_version}")
+//    compileOnly("maven.modrinth:jade:${rootProject.jade_version}+forge-forge,${rootProject.jade_minecraft_version}")
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 }
 
@@ -53,12 +50,6 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set("dev-shadow")
-}
-
-remapJar {
-    inputFile.set shadowJar.archiveFile
-    dependsOn shadowJar
     archiveClassifier.set(null)
 }
 
