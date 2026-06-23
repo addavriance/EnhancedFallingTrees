@@ -32,6 +32,14 @@ public class FallingTrees {
 				Identifier.fromNamespaceAndPath(MOD_ID, "block_map"), BlockMapEntityData.BLOCK_MAP);
 	}
 
+	static {
+		try {
+			Class.forName(Player.class.getName(), true, Player.class.getClassLoader());
+		} catch (ClassNotFoundException e) {
+			throw new ExceptionInInitializerError(e);
+		}
+	}
+
 	public static final EntityDataAccessor<Boolean> PLAYER_CLIENT_CONFIG =
 			SynchedEntityData.defineId(Player.class, EntityDataSerializers.BOOLEAN);
 }
