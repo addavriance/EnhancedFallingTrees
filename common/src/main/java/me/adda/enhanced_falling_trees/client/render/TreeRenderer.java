@@ -9,7 +9,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
@@ -17,6 +16,7 @@ import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
@@ -202,8 +202,8 @@ public class TreeRenderer extends EntityRenderer<TreeEntity, TreeRenderState> {
 			model.collectParts(RandomSource.create(blockState.getSeed(worldBlockPos)), parts);
 
 			RenderType renderType = model.hasMaterialFlag(BakedQuad.FLAG_TRANSLUCENT)
-					? Sheets.translucentBlockSheet()
-					: Sheets.cutoutBlockSheet();
+					? RenderTypes.translucentMovingBlock()
+					: RenderTypes.cutoutMovingBlock();
 
 			List<BlockTintSource> tintSources = Minecraft.getInstance().getBlockColors().getTintSources(blockState);
 			int[] tints = new int[tintSources.size()];

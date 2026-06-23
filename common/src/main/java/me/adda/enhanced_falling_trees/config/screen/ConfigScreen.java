@@ -45,7 +45,7 @@ public class ConfigScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 
 	private GridLayout setupGridLayout() {
@@ -60,7 +60,7 @@ public class ConfigScreen extends Screen {
 		rowHelper.addChild(clientConfigButton);
 		rowHelper.addChild(commonConfigButton);
 		rowHelper.addChild(SpacerElement.height(12), 2);
-		rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(parent)).build(), 2);
+		rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.gui.setScreen(parent)).build(), 2);
 
 		gridLayout.arrangeElements();
 	}
@@ -71,7 +71,7 @@ public class ConfigScreen extends Screen {
 	}
 
 	private <T extends ConfigData> Button openConfigScreen(Component text, Class<T> configClass) {
-		return Button.builder(text, button -> this.minecraft.setScreen(AutoConfigClient.getConfigScreen(configClass, this).get())).build();
+		return Button.builder(text, button -> this.minecraft.gui.setScreen(AutoConfigClient.getConfigScreen(configClass, this).get())).build();
 	}
 
 	private void modifyCommonConfigButton(Button commonConfigButton) {

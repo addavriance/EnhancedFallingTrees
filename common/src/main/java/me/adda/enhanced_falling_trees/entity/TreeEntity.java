@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Math;
 
@@ -59,7 +60,7 @@ public class TreeEntity extends Entity {
 	public static void destroyTree(Set<BlockPos> blockPosList, BlockPos blockPos, LevelAccessor levelAccessor, TreeType treeType, Player player) {
 		if (levelAccessor instanceof Level level) {
 			TreeEntity treeEntity = new TreeEntity(EntityRegistry.TREE.get(), level);
-			treeEntity.setPos(blockPos.getCenter().add(0, -.5, 0));
+			treeEntity.setPos(Vec3.atCenterOf(blockPos).add(0, -.5, 0));
 			treeEntity.setData(blockPosList, blockPos, treeType, player, player.getItemBySlot(EquipmentSlot.MAINHAND));
 			level.addFreshEntity(treeEntity);
 

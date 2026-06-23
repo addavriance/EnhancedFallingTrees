@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.LightCoordsUtil;
 
 public class RenderUtils {
-	private static float lightningMultiplier = 1.05f;
+	private static float lightningMultiplier = 0.6f;
 
 	public static void setLightningMultiplier(float multiplier) {
 		lightningMultiplier = Math.max(0.0f, Math.min(2.0f, multiplier));
