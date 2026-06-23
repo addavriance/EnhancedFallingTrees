@@ -4,11 +4,13 @@ import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SingleQuadParticle;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -51,15 +53,17 @@ public class LeavesUtils {
 
         int leafColor = getLeafColor(world, leavesState, leavesPos);
 
-        BlockStateModel model = client.getModelManager().getBlockModelShaper().getBlockModel(leavesState);
+        BlockStateModel model = client.getModelManager().getBlockStateModelSet().get(leavesState);
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        model.collectParts(random, parts);
         List<BakedQuad> quads = new ArrayList<>();
-        for (BlockModelPart part : model.collectParts(random)) {
+        for (BlockStateModelPart part : parts) {
             quads.addAll(part.getQuads(Direction.DOWN));
         }
         TextureAtlasSprite sprite = quads.isEmpty()
-                ? client.getModelManager().getBlockModelShaper().getParticleIcon(leavesState)
-                : quads.get(0).sprite();
-        boolean shouldColor = quads.isEmpty() || quads.stream().anyMatch(BakedQuad::isTinted);
+                ? client.getModelManager().getBlockStateModelSet().getParticleMaterial(leavesState).sprite()
+                : quads.get(0).materialInfo().sprite();
+        boolean shouldColor = quads.isEmpty() || quads.stream().anyMatch(quad -> quad.materialInfo().isTinted());
 
         Identifier texture = spriteToTexture(sprite);
         double[] leaves_rgb = calculateLeafColor(texture, shouldColor, leafColor);
@@ -75,7 +79,9 @@ public class LeavesUtils {
 
     private static int getLeafColor(Level world, BlockState leavesState, BlockPos leavesPos) {
         try {
-            return client.getBlockColors().getColor(leavesState, world, leavesPos, 0);
+            List<BlockTintSource> tints = client.getBlockColors().getTintSources(leavesState);
+            if (tints.isEmpty()) return -1;
+            return tints.get(0).colorInWorld(leavesState, (BlockAndTintGetter) world, leavesPos);
         } catch (Exception e) {
             return leavesState.getMapColor(world, leavesPos).col;
         }

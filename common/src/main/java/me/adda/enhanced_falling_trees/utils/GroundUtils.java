@@ -29,7 +29,7 @@ public class GroundUtils {
                 BlockPos checkPos = blockPos.above(j);
                 BlockState block = entity.level().getBlockState(checkPos);
                 boolean condition = includeWater ? (block.isSolid() || block.getBlock() instanceof LiquidBlock) : block.isSolid();
-                if (condition && !block.getTags().toList().contains(BlockTags.LEAVES)) {
+                if (condition && !block.is(BlockTags.LEAVES)) {
                     groundIndex = j;
                 }
             }
@@ -39,7 +39,7 @@ public class GroundUtils {
                     BlockPos checkPos = blockPos.above().below(k);
                     BlockState block = entity.level().getBlockState(checkPos);
                     boolean condition = includeWater ? (block.isSolid() || block.getBlock() instanceof LiquidBlock) : block.isSolid();
-                    if (!condition || block.getTags().toList().contains(BlockTags.LEAVES)) {
+                    if (!condition || block.is(BlockTags.LEAVES)) {
                         groundIndex = -k;
                     } else {
                         break;

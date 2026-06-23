@@ -2,11 +2,11 @@ package me.adda.enhanced_falling_trees.config.screen;
 
 import me.adda.enhanced_falling_trees.config.ClientConfig;
 import me.adda.enhanced_falling_trees.config.CommonConfig;
-import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.AutoConfigClient;
 import me.shedaniel.autoconfig.ConfigData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
@@ -38,9 +38,9 @@ public class ConfigScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
-		super.render(guiGraphics, mouseX, mouseY, partialTick);
+	public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+		guiGraphics.centeredText(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+		super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class ConfigScreen extends Screen {
 	}
 
 	private <T extends ConfigData> Button openConfigScreen(Component text, Class<T> configClass) {
-		return Button.builder(text, button -> this.minecraft.setScreen(AutoConfig.getConfigScreen(configClass, this).get())).build();
+		return Button.builder(text, button -> this.minecraft.setScreen(AutoConfigClient.getConfigScreen(configClass, this).get())).build();
 	}
 
 	private void modifyCommonConfigButton(Button commonConfigButton) {

@@ -8,20 +8,28 @@ import me.adda.enhanced_falling_trees.utils.RenderUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Environment(EnvType.CLIENT)
@@ -188,16 +196,24 @@ public class TreeRenderer extends EntityRenderer<TreeEntity, TreeRenderState> {
 			poseStack.translate(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 
 			BlockPos worldBlockPos = blockPos.offset(state.originPos);
-			int color = Minecraft.getInstance().getBlockColors().getColor(blockState, state.level, worldBlockPos, 0);
-			float r = ((color >> 16) & 0xFF) / 255.0f;
-			float g = ((color >> 8) & 0xFF) / 255.0f;
-			float b = (color & 0xFF) / 255.0f;
 
-			BlockStateModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(blockState);
+			BlockStateModel model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(blockState);
+			List<BlockStateModelPart> parts = new ArrayList<>();
+			model.collectParts(RandomSource.create(blockState.getSeed(worldBlockPos)), parts);
+
+			RenderType renderType = model.hasMaterialFlag(BakedQuad.FLAG_TRANSLUCENT)
+					? Sheets.translucentBlockSheet()
+					: Sheets.cutoutBlockSheet();
+
+			List<BlockTintSource> tintSources = Minecraft.getInstance().getBlockColors().getTintSources(blockState);
+			int[] tints = new int[tintSources.size()];
+			for (int i = 0; i < tintSources.size(); i++) {
+				tints[i] = tintSources.get(i).colorInWorld(blockState, (BlockAndTintGetter) state.level, worldBlockPos);
+			}
+
 			int light = RenderUtils.scaleLight(state.lightCoords);
 
-			collector.submitBlockModel(poseStack, ItemBlockRenderTypes.getRenderType(blockState), model,
-					r, g, b, light, OverlayTexture.NO_OVERLAY, 0);
+			collector.submitBlockModel(poseStack, renderType, parts, tints, light, OverlayTexture.NO_OVERLAY, 0);
 		} finally {
 			poseStack.popPose();
 		}

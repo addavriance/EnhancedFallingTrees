@@ -1,7 +1,7 @@
 package me.adda.enhanced_falling_trees.utils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 
 public class RenderUtils {
 	private static float lightningMultiplier = 1.05f;
@@ -15,9 +15,9 @@ public class RenderUtils {
 	}
 
 	public static int scaleLight(int light) {
-		int blockLight = Math.clamp(Math.round(LightTexture.block(light) * lightningMultiplier), 0, 15);
-		int skyLight = Math.clamp(Math.round(LightTexture.sky(light) * lightningMultiplier), 0, 15);
-		return LightTexture.pack(blockLight, skyLight);
+		int blockLight = Math.clamp(Math.round(LightCoordsUtil.block(light) * lightningMultiplier), 0, 15);
+		int skyLight = Math.clamp(Math.round(LightCoordsUtil.sky(light) * lightningMultiplier), 0, 15);
+		return LightCoordsUtil.pack(blockLight, skyLight);
 	}
 
 	public static float getDeltaTime() {

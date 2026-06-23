@@ -52,7 +52,7 @@ public class FilterConfig {
 				return false;
 
 			BlockState state = block.defaultBlockState();
-			boolean matchesTag = state.getTags()
+			boolean matchesTag = state.tags()
 					.anyMatch(tag -> whitelistedBlockTags.contains(tag.location().toString()));
 
 			boolean inWhitelist = whitelistedBlocks.contains(blockName);
