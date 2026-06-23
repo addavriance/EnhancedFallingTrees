@@ -29,7 +29,7 @@ dependencies {
 //    api "dev.architectury:architectury-forge:${rootProject.architectury_version}"
 
     // No official cloth-config-forge build exists for 1.21.5+, so we vendor a local build from ClothConfigApiForgePort.
-    api files("libs/cloth-config-26.1.154.jar")
+    api files("libs/cloth-config-26.2.155.jar")
 
 //    compileOnly("maven.modrinth:jade:${rootProject.jade_version}+forge-forge,${rootProject.jade_minecraft_version}")
 
