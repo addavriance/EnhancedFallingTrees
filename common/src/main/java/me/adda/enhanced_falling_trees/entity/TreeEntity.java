@@ -24,11 +24,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Math;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -64,9 +67,29 @@ public class TreeEntity extends Entity {
 			level.addFreshEntity(treeEntity);
 
 
+			// Remove every tree block first (deferring shape updates via updateLimit=0), then
+			// recompute neighbor shapes (e.g. fences) in a second pass once the whole tree is
+			// actually gone — otherwise a fence touching multiple tree blocks can recompute its
+			// connection against a still-partially-felled tree and end up stuck "connected".
+			BlockState airState = Blocks.AIR.defaultBlockState();
+			List<BlockPos> removedPositions = new ArrayList<>(blockPosList.size());
+			List<BlockState> removedOldStates = new ArrayList<>(blockPosList.size());
+
 			for (BlockPos pos : blockPosList) {
-				level.setBlock(pos, Blocks.AIR.defaultBlockState(), 0);
+				removedOldStates.add(level.getBlockState(pos));
+				removedPositions.add(pos);
+				level.setBlock(pos, airState, Block.UPDATE_ALL, 0);
 			}
+
+			int neighborUpdateFlags = Block.UPDATE_ALL & -34;
+			for (int i = 0; i < removedPositions.size(); i++) {
+				BlockPos pos = removedPositions.get(i);
+				BlockState oldState = removedOldStates.get(i);
+				oldState.updateIndirectNeighbourShapes(level, pos, neighborUpdateFlags, 511);
+				airState.updateNeighbourShapes(level, pos, neighborUpdateFlags, 511);
+				airState.updateIndirectNeighbourShapes(level, pos, neighborUpdateFlags, 511);
+			}
+
 			for (Map.Entry<BlockPos, BlockState> entry : treeEntity.getBlocks().entrySet()) {
 				level.sendBlockUpdated(entry.getKey().offset(blockPos), entry.getValue(), Blocks.AIR.defaultBlockState(), 3);
 			}
