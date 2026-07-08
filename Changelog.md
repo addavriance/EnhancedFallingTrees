@@ -4,12 +4,15 @@
 - Restructured block and general rendering system for better performance and visual quality.
 
 ## Improvements
+- Forge builds rely on a community-maintained Cloth Config Forge port (published under the slug cloth-config-forge on both Modrinth and CurseForge), since official Forge builds of Cloth Config were discontinued after 1.21.3.
+- Simplified the invert-crouch-mining sync to a plain server-side lookup instead of injecting into vanilla Player entity data, improving reliability across mod loaders.
 - Improved tree entity handling and client-side particle system for better visualization.
 - Enhanced leaves gathering algorithm for more accurate tree detection.
   > This should make tree detection more reliable and prevent unwanted blocks from being included.
 - Restructured rendering components for smoother animations and better performance.
 
 ## Bug Fixes
+- Fixed the game crashing on startup with NeoForge due to a missing client-side network handler for the config sync packet.
 - Fixed "maxTreeDistance" setting not working properly
   > Now the setting correctly limits the distance for tree block detection.
 - Fixed "Required tool" setting functionality
