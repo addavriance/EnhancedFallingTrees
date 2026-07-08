@@ -61,6 +61,11 @@
 	"text.autoconfig.efallingtrees_common.option.filter.leaves.whitelistedBlocks": "Whitelisted Blocks",
 	"text.autoconfig.efallingtrees_common.option.filter.leaves.blacklistedBlocks": "Blacklisted Blocks",
 
+	"text.autoconfig.efallingtrees_common.option.filter.tool": "Tool",
+	"text.autoconfig.efallingtrees_common.option.filter.tool.whitelistedItemTags": "Whitelisted Item tags",
+	"text.autoconfig.efallingtrees_common.option.filter.tool.whitelistedItems": "Whitelisted Items",
+	"text.autoconfig.efallingtrees_common.option.filter.tool.blacklistedItems": "Blacklisted Items",
+
 	"text.autoconfig.efallingtrees_common.category.limitations": "Limitations",
 	"text.autoconfig.efallingtrees_common.option.limitations.maxLeavesDistance": "Max leaves distance",
 	"text.autoconfig.efallingtrees_common.option.limitations.maxTreeDistance": "Max tree distance",
