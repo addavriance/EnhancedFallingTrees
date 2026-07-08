@@ -1,9 +1,18 @@
 # Version 0.7.0 Changelog
+## New Features
+- Added a setting to drop all tree loot on a single block instead of spreading it along the trunk.
+- Added Jade integration so falling tree entities no longer show a generic tooltip.
+
 ## Improvements
+- Removed Architectury API as a runtime dependency.
 - Forge builds rely on a community-maintained Cloth Config Forge port (published under the slug cloth-config-forge on both Modrinth and CurseForge), since official Forge builds of Cloth Config were discontinued after 1.21.3.
 - Simplified the invert-crouch-mining sync to a plain server-side lookup instead of injecting into vanilla Player entity data, improving reliability across mod loaders.
 
 ## Bug Fixes
+- Fixed leaf particles using the wrong texture initialization, which could cause them to render or animate incorrectly.
+- Fixed a ConcurrentModificationException crash related to tracking tree blocks.
+- Fixed a crash that could occur after continuously breaking trees, caused by unsafe iteration during tree-cache cleanup.
+- Fixed fences and similar blocks staying visually connected after the tree they were attached to was felled.
 - Fixed the game crashing on startup with NeoForge due to a missing client-side network handler for the config sync packet.
 
 # Version 0.6.0 Changelog
