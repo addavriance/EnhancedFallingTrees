@@ -1,9 +1,11 @@
 # Version 0.6.0 Changelog
 ## New Features
+- Added a configurable tool filter for tree felling, allowing items or item tags to be whitelisted or blacklisted, matching the existing log and leaves filter system.
 - Added custom cutting/mining speed setting to fine-tune tree falling mechanics.
 - Restructured block and general rendering system for better performance and visual quality.
 
 ## Improvements
+- Forge builds rely on a community-maintained Cloth Config Forge port (published under the slug cloth-config-forge on both Modrinth and CurseForge), since official Forge builds of Cloth Config were discontinued after 1.21.3.
 - Improved tree entity handling and client-side particle system for better visualization.
 - Enhanced leaves gathering algorithm for more accurate tree detection.
   > This should make tree detection more reliable and prevent unwanted blocks from being included.
