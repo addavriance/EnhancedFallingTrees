@@ -1,7 +1,8 @@
-# Version 0.7.0 Changelog
+# Version 0.7.1 Changelog
 ## New Features
 - Added a setting to drop all tree loot on a single block instead of spreading it along the trunk.
 - Added Jade integration so falling tree entities no longer show a generic tooltip.
+- Added a configurable tool filter for tree felling, allowing items or item tags to be whitelisted or blacklisted, matching the existing log and leaves filter system.
 
 ## Improvements
 - Removed Architectury API as a runtime dependency.
