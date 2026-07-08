@@ -4,7 +4,6 @@ import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.api.platform.network.NetworkService;
 import me.adda.enhanced_falling_trees.api.platform.network.PacketContext;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
@@ -71,10 +70,12 @@ public class NeoForgeNetworkService implements NetworkService {
                     NeoForgePayload.getType(id),
                     NeoForgePayload.codec(id),
                     (payload, context) -> context.enqueueWork(() -> {
-                        boolean serverbound = context.flow() == PacketFlow.SERVERBOUND;
-                        NeoForgePacketContext ctx = new NeoForgePacketContext(context.player(), serverbound);
-                        BiConsumer<FriendlyByteBuf, PacketContext> handler = serverbound ? c2sHandler : s2cHandler;
-                        if (handler != null) handler.accept(payload.data(), ctx);
+                        if (c2sHandler != null)
+                            c2sHandler.accept(payload.data(), new NeoForgePacketContext(context.player(), true));
+                    }),
+                    (payload, context) -> context.enqueueWork(() -> {
+                        if (s2cHandler != null)
+                            s2cHandler.accept(payload.data(), new NeoForgePacketContext(context.player(), false));
                     })
             );
         });
