@@ -13,7 +13,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ConfigPacket {
+	private static final Map<UUID, Boolean> INVERT_CROUCH_MINING = new ConcurrentHashMap<>();
+
 	public static void clientReceiver(FriendlyByteBuf buf, PacketContext context) {
 		byte[] configBytes = buf.readByteArray();
 		FallingTrees.CONFIG.setCommonConfig(new Gson().fromJson(new String(configBytes), CommonConfig.class));
@@ -28,7 +34,7 @@ public class ConfigPacket {
 
 	public static void serverReceiver(FriendlyByteBuf buf, PacketContext context) {
 		ClientConfig clientConfig = new Gson().fromJson(new String(buf.readByteArray()), ClientConfig.class);
-		context.getPlayer().getEntityData().set(FallingTrees.PLAYER_CLIENT_CONFIG, clientConfig.invertCrouchMining);
+		INVERT_CROUCH_MINING.put(context.getPlayer().getUUID(), clientConfig.invertCrouchMining);
 	}
 
 	public static void sendToServer() {
@@ -38,6 +44,6 @@ public class ConfigPacket {
 	}
 
 	public static boolean getClientConfig(Player player) {
-		return player.getEntityData().get(FallingTrees.PLAYER_CLIENT_CONFIG);
+		return INVERT_CROUCH_MINING.getOrDefault(player.getUUID(), false);
 	}
 }
