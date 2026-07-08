@@ -1,6 +1,9 @@
-# Version 0.6.0 Changelog
+# Version 0.7.1 Changelog
 ## New Features
 - Added a configurable tool filter for tree felling, allowing items or item tags to be whitelisted or blacklisted, matching the existing log and leaves filter system.
+
+# Version 0.6.0 Changelog
+## New Features
 - Added custom cutting/mining speed setting to fine-tune tree falling mechanics.
 - Restructured block and general rendering system for better performance and visual quality.
 
