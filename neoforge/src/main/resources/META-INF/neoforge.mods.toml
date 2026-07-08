@@ -47,6 +47,6 @@ issueTrackerURL="https://github.com/addavriance/EnhancedFallingTrees/issues"
 [[dependencies.efallingtrees]]
     modId="cloth_config"
     type="required"
-    versionRange="[11.1.106,)"
+    versionRange="[14.0.139,)"
     ordering="NONE"
     side="BOTH"
