@@ -4,13 +4,13 @@ import me.adda.enhanced_falling_trees.FallingTrees;
 import me.adda.enhanced_falling_trees.api.platform.network.NetworkService;
 import me.adda.enhanced_falling_trees.api.platform.network.PacketContext;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
@@ -67,16 +67,26 @@ public class NeoForgeNetworkService implements NetworkService {
         allIds.forEach(id -> {
             BiConsumer<FriendlyByteBuf, PacketContext> c2sHandler = C2S.get(id);
             BiConsumer<FriendlyByteBuf, PacketContext> s2cHandler = S2C.get(id);
-            registrar.playBidirectional(
-                    NeoForgePayload.getType(id),
-                    NeoForgePayload.codec(id),
-                    (payload, context) -> context.enqueueWork(() -> {
-                        boolean serverbound = context.flow() == PacketFlow.SERVERBOUND;
-                        NeoForgePacketContext ctx = new NeoForgePacketContext(context.player(), serverbound);
-                        BiConsumer<FriendlyByteBuf, PacketContext> handler = serverbound ? c2sHandler : s2cHandler;
-                        if (handler != null) handler.accept(payload.data(), ctx);
-                    })
-            );
+
+            IPayloadHandler<NeoForgePayload> server = c2sHandler == null ? null : wrap(c2sHandler, true);
+            IPayloadHandler<NeoForgePayload> client = s2cHandler == null ? null : wrap(s2cHandler, false);
+
+            // NeoForge now registers server- and client-bound handlers separately (a null
+            // clientHandler would otherwise require a RegisterClientPayloadHandlersEvent listener).
+            if (server != null && client != null) {
+                registrar.playBidirectional(NeoForgePayload.getType(id), NeoForgePayload.codec(id), server, client);
+            } else if (server != null) {
+                registrar.playBidirectional(NeoForgePayload.getType(id), NeoForgePayload.codec(id), server);
+            } else {
+                registrar.playToClient(NeoForgePayload.getType(id), NeoForgePayload.codec(id), client);
+            }
+        });
+    }
+
+    private static IPayloadHandler<NeoForgePayload> wrap(BiConsumer<FriendlyByteBuf, PacketContext> handler, boolean serverbound) {
+        return (payload, context) -> context.enqueueWork(() -> {
+            NeoForgePacketContext ctx = new NeoForgePacketContext(context.player(), serverbound);
+            handler.accept(payload.data(), ctx);
         });
     }
 }
