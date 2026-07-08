@@ -1,3 +1,7 @@
+# Version 0.7.0 Changelog
+## Bug Fixes
+- Tightened minimum required versions for Fabric Loader, Fabric API, Cloth Config, and Forge to match what is actually supported, preventing installs on untested or broken dependency combinations.
+
 # Version 0.6.0 Changelog
 ## New Features
 - Added custom cutting/mining speed setting to fine-tune tree falling mechanics.
@@ -10,7 +14,6 @@
 - Restructured rendering components for smoother animations and better performance.
 
 ## Bug Fixes
-- Tightened minimum required versions for Fabric Loader, Fabric API, Cloth Config, and Forge to match what is actually supported, preventing installs on untested or broken dependency combinations.
 - Fixed "maxTreeDistance" setting not working properly
   > Now the setting correctly limits the distance for tree block detection.
 - Fixed "Required tool" setting functionality
