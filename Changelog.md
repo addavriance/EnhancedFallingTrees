@@ -1,6 +1,17 @@
 # Version 0.7.1 Changelog
 ## New Features
+- Added a setting to drop all tree loot on a single block instead of spreading it along the trunk.
+- Added Jade integration so falling tree entities no longer show a generic tooltip.
 - Added a configurable tool filter for tree felling, allowing items or item tags to be whitelisted or blacklisted, matching the existing log and leaves filter system.
+
+## Improvements
+- Removed Architectury API as a runtime dependency.
+
+## Bug Fixes
+- Fixed leaf particles using the wrong texture initialization, which could cause them to render or animate incorrectly.
+- Fixed a ConcurrentModificationException crash related to tracking tree blocks.
+- Fixed a crash that could occur after continuously breaking trees, caused by unsafe iteration during tree-cache cleanup.
+- Fixed fences and similar blocks staying visually connected after the tree they were attached to was felled.
 
 # Version 0.6.0 Changelog
 ## New Features
