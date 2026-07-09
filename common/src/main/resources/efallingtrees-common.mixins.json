@@ -4,8 +4,7 @@
 	"package": "me.adda.enhanced_falling_trees.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-      "BlockBreakingMixin",
-      "PlayerMixin"
+      "BlockBreakingMixin"
     ],
 	"client": [],
 	"injectors": {
