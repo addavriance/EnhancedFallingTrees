@@ -9,12 +9,17 @@ import me.adda.enhanced_falling_trees.api.platform.network.PacketContext;
 import me.adda.enhanced_falling_trees.config.ClientConfig;
 import me.adda.enhanced_falling_trees.config.CommonConfig;
 import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 public class ConfigPacket {
+	private static final Map<UUID, Boolean> INVERT_CROUCH_MINING = new ConcurrentHashMap<>();
+
 	public static void clientReceiver(FriendlyByteBuf buf, PacketContext context) {
 		byte[] configBytes = buf.readByteArray();
 		FallingTrees.CONFIG.setCommonConfig(new Gson().fromJson(new String(configBytes), CommonConfig.class));
@@ -29,9 +34,7 @@ public class ConfigPacket {
 
 	public static void serverReceiver(FriendlyByteBuf buf, PacketContext context) {
 		ClientConfig clientConfig = new Gson().fromJson(new String(buf.readByteArray()), ClientConfig.class);
-		CompoundTag tag = new CompoundTag();
-		tag.putBoolean("invertCrouchMining", clientConfig.invertCrouchMining);
-		context.getPlayer().getEntityData().set(FallingTrees.PLAYER_CLIENT_CONFIG, tag);
+		INVERT_CROUCH_MINING.put(context.getPlayer().getUUID(), clientConfig.invertCrouchMining);
 	}
 
 	public static void sendToServer() {
@@ -40,7 +43,7 @@ public class ConfigPacket {
 		NetworkServices.getNetworkService().sendToServer(PacketHandler.CONFIG_PACKET_ID, buf);
 	}
 
-	public static CompoundTag getClientConfig(Player player) {
-		return player.getEntityData().get(FallingTrees.PLAYER_CLIENT_CONFIG);
+	public static boolean getClientConfig(Player player) {
+		return INVERT_CROUCH_MINING.getOrDefault(player.getUUID(), false);
 	}
 }
