@@ -9,11 +9,7 @@ import me.adda.enhanced_falling_trees.registry.ParticleRegistry;
 import me.adda.enhanced_falling_trees.registry.SoundRegistry;
 import me.adda.enhanced_falling_trees.registry.TreeTypeRegistry;
 import me.adda.enhanced_falling_trees.utils.BlockMapEntityData;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.player.Player;
 
 public class FallingTrees {
 	public static final String MOD_ID = "efallingtrees";
@@ -31,7 +27,4 @@ public class FallingTrees {
 		PlatformServices.REGISTRATION.registerEntityDataSerializer(
 				Identifier.fromNamespaceAndPath(MOD_ID, "block_map"), BlockMapEntityData.BLOCK_MAP);
 	}
-
-	public static final EntityDataAccessor<Boolean> PLAYER_CLIENT_CONFIG =
-			SynchedEntityData.defineId(Player.class, EntityDataSerializers.BOOLEAN);
 }
