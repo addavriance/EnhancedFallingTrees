@@ -92,6 +92,8 @@
   "text.autoconfig.efallingtrees_common.option.features.disableCactusTrees": "Отключить падение кактусов",
   "text.autoconfig.efallingtrees_common.option.features.disableBambooTrees": "Отключить падение бамбука",
   "text.autoconfig.efallingtrees_common.option.features.disableChorusTrees": "Отключить падение хоруса",
+  "text.autoconfig.efallingtrees_common.option.features.allowMixedTrees": "Рубить смешанные деревья (разные брёвна/листва) как одно",
+  "text.autoconfig.efallingtrees_common.option.features.treeChopCompat": "Анимация падения для деревьев, срубленных TreeChop",
 
   "text.autoconfig.efallingtrees_common.category.tree_breaking": "Ломание деревьев",
   "text.autoconfig.efallingtrees_common.option.treeBreaking.enableBreakingSpeedModification": "Включить изменение скорости ломания",
@@ -104,5 +106,16 @@
   "text.autoconfig.efallingtrees_common.option.treeBreaking.axeSpeedMultiplier.@Tooltip": "(% от скорости инструмента)",
 
   "text.autoconfig.efallingtrees_common.option.treeBreaking.isLootDropOnSingleBlock": "Дроп на одном блоке",
-  "text.autoconfig.efallingtrees_common.option.treeBreaking.isLootDropOnSingleBlock.@Tooltip": "Включить дроп лута на одном блоке вместо распределения его вдоль ствола"
+  "text.autoconfig.efallingtrees_common.option.treeBreaking.isLootDropOnSingleBlock.@Tooltip": "Включить дроп лута на одном блоке вместо распределения его вдоль ствола",
+  "text.autoconfig.efallingtrees_common.option.filter.tool": "Инструмент",
+  "text.autoconfig.efallingtrees_common.option.filter.tool.whitelistedItemTags": "Разрешенные теги предметов",
+  "text.autoconfig.efallingtrees_common.option.filter.tool.whitelistedItems": "Разрешенные предметы",
+  "text.autoconfig.efallingtrees_common.option.filter.tool.blacklistedItems": "Запрещенные предметы",
+  "text.autoconfig.efallingtrees_common.category.physics": "Физика",
+  "text.autoconfig.efallingtrees_common.option.physics.treeDamage": "Падающие деревья наносят урон",
+  "text.autoconfig.efallingtrees_common.option.physics.damagePerBlock": "Урон за блок высоты падения",
+  "text.autoconfig.efallingtrees_common.option.physics.maxDamage": "Максимальный урон",
+  "text.autoconfig.efallingtrees_common.option.physics.knockback": "Сила отталкивания",
+  "text.autoconfig.efallingtrees_common.option.physics.leavesPush": "Листва мягко расталкивает",
+  "text.autoconfig.efallingtrees_common.option.physics.solidTrunk": "Упавший ствол твёрдый"
 }

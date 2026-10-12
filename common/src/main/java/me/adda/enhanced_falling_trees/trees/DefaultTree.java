@@ -8,8 +8,6 @@ import me.adda.enhanced_falling_trees.entity.TreeEntity;
 import me.adda.enhanced_falling_trees.utils.GroundUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,7 +52,7 @@ public class DefaultTree implements TreeType {
 
 	@Override
 	public boolean allowedTool(ItemStack itemStack) {
-		return itemStack.getItem() instanceof AxeItem || itemStack.is(ItemTags.AXES);
+		return FallingTreesConfig.getCommonConfig().filter.tool.isValid(itemStack.getItem());
 	}
 
 	@Override
@@ -62,15 +60,15 @@ public class DefaultTree implements TreeType {
 		if (entity == null ) return;
 
 		if (PlatformServices.getPlatform().isClient()) {
-			if (entity.tickCount == 1) {
+			if (entity.getAge() == 1) {
 				TreeEffects.playTreeFallSound(entity);
 			}
 
-			if (entity.tickCount == (int) (this.getFallAnimLength() * 20) - 5) {
+			if (entity.getAge() == (int) (this.getFallAnimLength() * 20) - 5) {
 				TreeEffects.playTreeImpactSound(entity);
 			}
 
-			if (entity.tickCount >= (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
+			if (entity.getAge() >= (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
 				handleParticles(entity);
 			}
 		}
@@ -196,7 +194,7 @@ public class DefaultTree implements TreeType {
 	}
 
 	private boolean isMatchingLog(BlockState state, BlockState initialState) {
-		return baseBlockCheck(state) && state.getBlock() == initialState.getBlock();
+		return baseBlockCheck(state) && (mixedTrees() || state.getBlock() == initialState.getBlock());
 	}
 
 	private Set<BlockPos> gatherLeaves(TreeStructure treeStructure, LevelAccessor level) {
@@ -256,7 +254,7 @@ public class DefaultTree implements TreeType {
 	}
 
 	private boolean isValidLeaf(BlockState state, int distance, BlockState correctLeafType) {
-		if (state.getBlock() != correctLeafType.getBlock()) return false;
+		if (!mixedTrees() && state.getBlock() != correctLeafType.getBlock()) return false;
 
 		if (state.hasProperty(BlockStateProperties.DISTANCE)) {
 			int leafDistance = state.getValue(BlockStateProperties.DISTANCE);
@@ -276,10 +274,14 @@ public class DefaultTree implements TreeType {
 			if (processed.contains(nextPos)) continue;
 
 			BlockState nextState = level.getBlockState(nextPos);
-			if (extraRequiredBlockCheck(nextState) && nextState.getBlock() == correctLeafType.getBlock()) {
+			if (extraRequiredBlockCheck(nextState) && (mixedTrees() || nextState.getBlock() == correctLeafType.getBlock())) {
 				queue.offer(new LeafSearchNode(nextPos, nextDistance));
 			}
 		}
+	}
+
+	private static boolean mixedTrees() {
+		return FallingTreesConfig.getCommonConfig().features.allowMixedTrees;
 	}
 
 	@Override
