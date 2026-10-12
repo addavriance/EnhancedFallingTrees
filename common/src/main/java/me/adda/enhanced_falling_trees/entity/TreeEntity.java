@@ -6,6 +6,10 @@ import me.adda.enhanced_falling_trees.config.FallingTreesConfig;
 import me.adda.enhanced_falling_trees.registry.EntityRegistry;
 import me.adda.enhanced_falling_trees.registry.TreeTypeRegistry;
 import me.adda.enhanced_falling_trees.utils.BlockMapEntityData;
+import me.adda.enhanced_falling_trees.utils.GroundUtils;
+import me.adda.enhanced_falling_trees.utils.TreePose;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -47,9 +51,28 @@ public class TreeEntity extends Entity {
 	public static final EntityDataAccessor<ItemStack> USED_TOOL = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.ITEM_STACK);
 	public static final EntityDataAccessor<Direction> FALL_DIRECTION = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.DIRECTION);
 	public static final EntityDataAccessor<String> TREE_TYPE_LOCATION = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.STRING);
+	// Age the tree had when it was loaded from disk, so clients don't replay the fall
+	public static final EntityDataAccessor<Integer> START_AGE = SynchedEntityData.defineId(TreeEntity.class, EntityDataSerializers.INT);
 
 	public Entity owner = null;
 	public TreeType treeType = null;
+
+	private static final float HALF_PI = (float) java.lang.Math.PI / 2;
+	// How fast the fall angle follows the ground, per tick (the renderer used to do this per frame)
+	private static final float WATER_LERP_FACTOR = 0.03f;
+	private static final float NORMAL_LERP_FACTOR = 0.14f;
+	private static final float MIN_BOUNCE_TRIGGER_ANGLE = 10f;
+
+	private float fallAngle;
+	private float prevFallAngle;
+	private boolean fallAngleStarted;
+	private boolean inLiquid;
+	private int pivotDistance = -1;
+	// Collision state, server side only
+	final Set<java.util.UUID> hitEntities = new java.util.HashSet<>();
+	final Set<java.util.UUID> brushedEntities = new java.util.HashSet<>();
+	final Map<BlockPos, Vec3> lastCenters = new java.util.HashMap<>();
+	float lastRotation;
 
 	public TreeEntity(EntityType<?> entityType, Level level) {
 		super(entityType, level);
@@ -130,16 +153,38 @@ public class TreeEntity extends Entity {
 		builder.define(USED_TOOL, ItemStack.EMPTY);
 		builder.define(FALL_DIRECTION, Direction.NORTH);
 		builder.define(TREE_TYPE_LOCATION, "");
+		builder.define(START_AGE, 0);
+	}
+
+	private record SavedBlock(BlockPos pos, BlockState state) {
+		static final Codec<SavedBlock> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				BlockPos.CODEC.fieldOf("pos").forGetter(SavedBlock::pos),
+				BlockState.CODEC.fieldOf("state").forGetter(SavedBlock::state)
+		).apply(instance, SavedBlock::new));
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
-
+		Map<BlockPos, BlockState> blocks = new ConcurrentHashMap<>();
+		input.listOrEmpty("Blocks", SavedBlock.CODEC).forEach(block -> blocks.put(block.pos(), block.state()));
+		this.getEntityData().set(BLOCKS, blocks);
+		input.read("OriginPos", BlockPos.CODEC).ifPresent(pos -> this.getEntityData().set(ORIGIN_POS, pos));
+		input.read("FallDirection", Direction.CODEC).ifPresent(direction -> this.getEntityData().set(FALL_DIRECTION, direction));
+		input.read("UsedTool", ItemStack.OPTIONAL_CODEC).ifPresent(tool -> this.getEntityData().set(USED_TOOL, tool));
+		this.getEntityData().set(TREE_TYPE_LOCATION, input.getStringOr("TreeType", ""));
+		this.tickCount = input.getIntOr("TreeAge", 0);
+		this.getEntityData().set(START_AGE, this.tickCount);
 	}
 
 	@Override
 	protected void addAdditionalSaveData(ValueOutput output) {
-
+		ValueOutput.TypedOutputList<SavedBlock> blocks = output.list("Blocks", SavedBlock.CODEC);
+		this.getBlocks().forEach((pos, state) -> blocks.add(new SavedBlock(pos, state)));
+		output.store("OriginPos", BlockPos.CODEC, this.getOriginPos());
+		output.store("FallDirection", Direction.CODEC, this.getDirection());
+		output.store("UsedTool", ItemStack.OPTIONAL_CODEC, this.getUsedTool());
+		output.putString("TreeType", this.getEntityData().get(TREE_TYPE_LOCATION));
+		output.putInt("TreeAge", this.tickCount);
 	}
 
 	@Override
@@ -149,12 +194,100 @@ public class TreeEntity extends Entity {
 		if (!this.isNoGravity()) {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
 		}
+		// The tree stays where it was cut: only gravity, no sideways drift (water currents etc.)
+		this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		if (this.onGround()) {
 			this.setDeltaMovement(this.getDeltaMovement().multiply(1, -0.5, 1));
 		}
 
-		this.getTreeType().entityTick(this);
+		TreeType type = this.getTreeType();
+		if (type == null || this.getBlocks().isEmpty()) {
+			// Broken or empty tree data, nothing to fall
+			if (!this.level().isClientSide()) this.discard();
+			return;
+		}
+
+		this.updateFallAngle(type);
+		if (!this.level().isClientSide()) {
+			TreeCollisions.tick(this, type);
+		}
+
+		type.entityTick(this);
+	}
+
+	@Override
+	public boolean isPushedByFluid() {
+		return false;
+	}
+
+	private void updateFallAngle(TreeType type) {
+		this.prevFallAngle = this.fallAngle;
+		float time = this.getAge() * HALF_PI / type.getFallAnimLength();
+		if (!this.fallAngleStarted || this.tickCount % 5 == 0) {
+			this.inLiquid = GroundUtils.willBeInLiquid(this);
+		}
+
+		float target;
+		if (bumpCos(time) * this.fallAngle <= MIN_BOUNCE_TRIGGER_ANGLE && this.inLiquid) {
+			Integer[] waterGroundIndexes = GroundUtils.getGroundIndexes(this, true);
+			float waterHeight = GroundUtils.calculateAverageWaterHeight(this, waterGroundIndexes);
+			float waterAngle = GroundUtils.calculateFallAngle(waterGroundIndexes);
+			target = waterAngle + (waterAngle - waterAngle * waterHeight);
+		} else {
+			target = GroundUtils.calculateFallAngle(GroundUtils.getGroundIndexes(this, false));
+		}
+
+		if (!this.fallAngleStarted && this.getStartAge() > 0) {
+			// Loaded mid-fall or already lying: don't fall again
+			this.fallAngle = this.prevFallAngle = target;
+		} else {
+			float lerpFactor = (bumpCos(time) * this.fallAngle <= 1 && this.inLiquid) ? WATER_LERP_FACTOR : NORMAL_LERP_FACTOR;
+			this.fallAngle = Math.lerp(this.fallAngle, target, lerpFactor);
+		}
+		this.fallAngleStarted = true;
+	}
+
+	/** Rotation of the tree in degrees (negative while it tips over), smooth between ticks. */
+	public float getRotation(float partialTick) {
+		TreeType type = this.getTreeType();
+		if (type == null) return 0;
+
+		float targetAngle = Math.lerp(this.prevFallAngle, this.fallAngle, partialTick);
+		float time = this.getLifetime(partialTick) * HALF_PI / type.getFallAnimLength();
+		float fallAnim = bumpCos(time) * targetAngle;
+
+		float bounceAnim;
+		if (this.inLiquid) {
+			bounceAnim = Math.sin((time + type.getBounceAnimLength()) * type.getBounceAngleHeight());
+		} else {
+			float bounceHeight = Math.clamp(0, type.getBounceAngleHeight(), Math.round(targetAngle / 10));
+			float adjustedTime = (time - HALF_PI) / (type.getBounceAnimLength() / (type.getFallAnimLength() * 2));
+			bounceAnim = bumpSin(adjustedTime) * bounceHeight;
+		}
+
+		return (fallAnim + bounceAnim) - targetAngle;
+	}
+
+	/** Transform from tree-local block coordinates to positions relative to this entity. */
+	public org.joml.Matrix4f getPose(float partialTick) {
+		TreeType type = this.getTreeType();
+		if (this.pivotDistance < 0) {
+			this.pivotDistance = TreePose.pivotDistance(this.getBlocks(), this.getDirection(), type);
+		}
+		return TreePose.matrix(this.getDirection().getOpposite(), this.pivotDistance, type.fallAnimationEdgeDistance(), this.getRotation(partialTick));
+	}
+
+	public boolean isInLiquid() {
+		return this.inLiquid;
+	}
+
+	private static float bumpCos(float time) {
+		return Math.max(0, Math.cos(Math.clamp(-(float) java.lang.Math.PI, (float) java.lang.Math.PI, time)));
+	}
+
+	private static float bumpSin(float time) {
+		return Math.max(0, Math.sin(Math.clamp(-(float) java.lang.Math.PI, (float) java.lang.Math.PI, time)));
 	}
 
 	public Map<BlockPos, BlockState> getBlocks() {
@@ -176,7 +309,16 @@ public class TreeEntity extends Entity {
 	}
 
 	public float getLifetime(float partialTick) {
-		return (this.tickCount + partialTick) / 20;
+		return (this.getAge() + partialTick) / 20;
+	}
+
+	/** Ticks since the tree was felled; on clients this includes the age it was loaded with. */
+	public int getAge() {
+		return this.level().isClientSide() ? this.tickCount + this.getStartAge() : this.tickCount;
+	}
+
+	public int getStartAge() {
+		return this.getEntityData().get(START_AGE);
 	}
 
 	public boolean isLarge() {
