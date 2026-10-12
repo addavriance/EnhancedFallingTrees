@@ -60,15 +60,15 @@ public class DefaultTree implements TreeType {
 		if (entity == null ) return;
 
 		if (PlatformServices.getPlatform().isClient()) {
-			if (entity.tickCount == 1) {
+			if (entity.getAge() == 1) {
 				TreeEffects.playTreeFallSound(entity);
 			}
 
-			if (entity.tickCount == (int) (this.getFallAnimLength() * 20) - 5) {
+			if (entity.getAge() == (int) (this.getFallAnimLength() * 20) - 5) {
 				TreeEffects.playTreeImpactSound(entity);
 			}
 
-			if (entity.tickCount >= (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
+			if (entity.getAge() >= (int) (FallingTreesConfig.getCommonConfig().treeLifetimeLength * 20) - 1) {
 				handleParticles(entity);
 			}
 		}
@@ -194,7 +194,7 @@ public class DefaultTree implements TreeType {
 	}
 
 	private boolean isMatchingLog(BlockState state, BlockState initialState) {
-		return baseBlockCheck(state) && state.getBlock() == initialState.getBlock();
+		return baseBlockCheck(state) && (mixedTrees() || state.getBlock() == initialState.getBlock());
 	}
 
 	private Set<BlockPos> gatherLeaves(TreeStructure treeStructure, LevelAccessor level) {
@@ -254,7 +254,7 @@ public class DefaultTree implements TreeType {
 	}
 
 	private boolean isValidLeaf(BlockState state, int distance, BlockState correctLeafType) {
-		if (state.getBlock() != correctLeafType.getBlock()) return false;
+		if (!mixedTrees() && state.getBlock() != correctLeafType.getBlock()) return false;
 
 		if (state.hasProperty(BlockStateProperties.DISTANCE)) {
 			int leafDistance = state.getValue(BlockStateProperties.DISTANCE);
@@ -274,10 +274,14 @@ public class DefaultTree implements TreeType {
 			if (processed.contains(nextPos)) continue;
 
 			BlockState nextState = level.getBlockState(nextPos);
-			if (extraRequiredBlockCheck(nextState) && nextState.getBlock() == correctLeafType.getBlock()) {
+			if (extraRequiredBlockCheck(nextState) && (mixedTrees() || nextState.getBlock() == correctLeafType.getBlock())) {
 				queue.offer(new LeafSearchNode(nextPos, nextDistance));
 			}
 		}
+	}
+
+	private static boolean mixedTrees() {
+		return FallingTreesConfig.getCommonConfig().features.allowMixedTrees;
 	}
 
 	@Override
