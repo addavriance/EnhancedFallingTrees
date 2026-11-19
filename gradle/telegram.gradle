@@ -1,69 +1,83 @@
 import java.text.SimpleDateFormat
 
-tasks.register('sendToTelegram') {
-    description = 'Sends built JAR files to Telegram'
-    group = 'distribution'
+tasks.register("sendToTelegram") {
+    description = "Sends built JAR files from dist/ to Telegram."
+    group = "distribution"
 
     doLast {
-        def botToken = System.getenv('TELEGRAM_BOT_TOKEN')
-        def chatId = System.getenv('TELEGRAM_CHAT_ID')
-
+        def botToken = System.getenv("TELEGRAM_BOT_TOKEN")
+        def chatId = System.getenv("TELEGRAM_CHAT_ID")
         if (!botToken || !chatId) {
-            throw new GradleException('TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID env vars not set')
+            throw new GradleException("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID env vars not set")
         }
 
-        def date = new Date()
+        def distDirectory = rootProject.file("dist")
+        def jarFiles = (distDirectory.listFiles() ?: new File[0])
+                .findAll { it.isFile() && it.name.endsWith(".jar") }
+                .sort { it.name }
+        if (jarFiles.isEmpty()) {
+            throw new GradleException("No built JAR files found in " + distDirectory)
+        }
+
         def dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm")
-        def formattedDate = dateFormat.format(date)
+        def formattedDate = dateFormat.format(new Date())
         def gitInfo = getGitInfo()
+        println "Sending ${jarFiles.size()} JAR file(s) to Telegram..."
 
-        println "Sending artifacts to Telegram..."
+        jarFiles.each { jarFile ->
+            def artifactPrefix = rootProject.archives_base_name + "-"
+            if (!jarFile.name.startsWith(artifactPrefix) || !jarFile.name.endsWith(".jar")) {
+                println "Skipping unrecognized artifact name: " + jarFile.name
+                return
+            }
 
-        ['fabric', 'forge', 'neoforge'].each { modType ->
-            def jarName = "${archives_base_name}-${mod_version}-${minecraft_version}+${modType}.jar"
-            def jarFile = file("${modType}/build/libs/${jarName}")
+            def body = jarFile.name.substring(artifactPrefix.length(), jarFile.name.length() - 4)
+            def loaderSeparator = body.lastIndexOf("+")
+            def versionSeparator = body.indexOf("-")
+            if (versionSeparator < 1 || loaderSeparator <= versionSeparator) {
+                println "Skipping unrecognized artifact name: " + jarFile.name
+                return
+            }
+            def modVersion = body.substring(0, versionSeparator)
+            def minecraftVersion = body.substring(versionSeparator + 1, loaderSeparator)
+            def loader = body.substring(loaderSeparator + 1)
+            if (!(loader in ["fabric", "forge", "neoforge"])) {
+                println "Skipping unrecognized artifact name: " + jarFile.name
+                return
+            }
+            def caption = "🌲 EnhancedFallingTrees Build\n" +
+                    "• Version: ${modVersion}\n" +
+                    "• Platform: ${loader.capitalize()}\n" +
+                    "• Minecraft: ${minecraftVersion}\n" +
+                    "• Build time: ${formattedDate}\n" +
+                    "• Size: ${formatFileSize(jarFile.length())}\n" +
+                    "${gitInfo}"
+            def tempFile = File.createTempFile("caption", ".txt")
+            tempFile.deleteOnExit()
+            tempFile.text = caption
 
-            if (jarFile.exists()) {
-                println "📦 Sending ${jarName}..."
-
-                def caption = "🌲 EnhancedFallingTrees Build\n" +
-                        "• Version: ${mod_version}\n" +
-                        "• Platform: ${modType.capitalize()}\n" +
-                        "• Minecraft: ${minecraft_version}\n" +
-                        "• Build time: ${formattedDate}\n" +
-                        "• Size: ${formatFileSize(jarFile.length())}\n" +
-                        "${gitInfo}"
-
-                def tempFile = File.createTempFile("caption", ".txt")
-                tempFile.deleteOnExit()
-                tempFile.text = caption
-
-                new ProcessBuilder('curl', '-sS', '-o', '/dev/null', '-X', 'POST',
-                        '-F', "chat_id=${chatId}",
-                        '-F', "document=@${jarFile.absolutePath}",
-                        '-F', "caption=<${tempFile.absolutePath}",
-                        "https://api.telegram.org/bot${botToken}/sendDocument")
-                        .inheritIO().start().waitFor()
-
-                println "✅ ${jarName} sent"
+            def result = exec {
+                commandLine "curl", "-sS", "-o", "/dev/null", "-X", "POST",
+                        "-F", "chat_id=${chatId}",
+                        "-F", "document=@${jarFile.absolutePath}",
+                        "-F", "caption=<${tempFile.absolutePath}",
+                        "https://api.telegram.org/bot${botToken}/sendDocument"
+                ignoreExitValue true
+            }
+            if (result.exitValue == 0) {
+                println "Sent " + jarFile.name
             } else {
-                println "⚠️ Not found: ${jarFile.absolutePath}"
+                println "Failed to send " + jarFile.name + " (curl exit " + result.exitValue + ")"
             }
         }
-
-        println "✨ Done!"
     }
 }
 
-tasks.register('buildAndSend') {
-    description = 'Builds all platforms and sends JARs to Telegram'
-    group = 'distribution'
-
-    dependsOn ':fabric:build'
-    dependsOn ':forge:build'
-    dependsOn ':neoforge:build'
-
-    finalizedBy 'sendToTelegram'
+tasks.register("buildAndSend") {
+    description = "Builds release JARs for selected targets and sends them to Telegram."
+    group = "distribution"
+    dependsOn tasks.named("dist")
+    finalizedBy tasks.named("sendToTelegram")
 }
 
 static def getGitInfo() {

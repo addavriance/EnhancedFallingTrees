@@ -1,0 +1,84 @@
+apply plugin: rootProject.ext.loomPluginId
+apply plugin: "architectury-plugin"
+apply plugin: "java"
+
+def versionDir = projectDir.parentFile
+def versionProperties = new Properties()
+new File(versionDir, "version.properties").withInputStream { versionProperties.load(it) }
+
+ext.vp = versionProperties
+ext.mcVersion = versionProperties.getProperty("minecraft_version")
+ext.isModern = versionProperties.getProperty("build_family") == "modern"
+ext.targetModule = projectDir.name
+def resourceSourceDirs = [
+        rootProject.ext.repoRoot.toPath().resolve("${targetModule}/src/main/resources").toFile(),
+        rootProject.ext.repoRoot.toPath().resolve("compat/resources/${versionProperties.getProperty('resource_family')}/${targetModule}/src/main/resources").toFile()
+] + versionProperties.getProperty("resource_groups", "").split(",").findAll { it }.collect { group ->
+    rootProject.ext.repoRoot.toPath().resolve("compat/resources/shared/${group}/${targetModule}/src/main/resources").toFile()
+}
+resourceSourceDirs = resourceSourceDirs.findAll { it.exists() }
+ext.resourceSourceDirs = resourceSourceDirs
+ext.commonAccessWidener = ([rootProject.ext.repoRoot.toPath().resolve("compat/resources/${versionProperties.getProperty('resource_family')}/common/src/main/resources").toFile()] +
+        versionProperties.getProperty("resource_groups", "").split(",").findAll { it }.collect { group ->
+            rootProject.ext.repoRoot.toPath().resolve("compat/resources/shared/${group}/common/src/main/resources").toFile()
+        }).collect { new File(it, "efallingtrees.accesswidener") }.find { it.exists() }
+
+def moduleName = projectDir.name
+def sourceFamily = versionProperties.getProperty("source_family")
+def sharedSourceRoot = rootProject.ext.repoRoot.toPath().resolve("${moduleName}/src/main").toFile()
+def compatSourceRoot = rootProject.ext.repoRoot.toPath().resolve("compat/mc/${sourceFamily}/${moduleName}/src/main").toFile()
+
+group = rootProject.maven_group
+version = "${versionProperties.getProperty('mod_version')}-${mcVersion}+${moduleName}"
+base {
+    archivesName = rootProject.archives_base_name
+}
+
+architectury {
+    minecraft = mcVersion
+}
+
+sourceSets {
+    main {
+        java.setSrcDirs([new File(sharedSourceRoot, "java"), new File(compatSourceRoot, "java")].findAll { it.exists() })
+        resources.setSrcDirs(resourceSourceDirs)
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(versionProperties.getProperty("java_toolchain_version").toInteger())
+    }
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = versionProperties.getProperty("java_release").toInteger()
+}
+
+loom {
+    if (!isModern) {
+        silentMojangMappingsLicense()
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${mcVersion}"
+
+    if (!isModern) {
+        mappings loom.layered() {
+            officialMojangMappings()
+            def parchmentVersion = versionProperties.getProperty("parchment_version")
+            if (parchmentVersion) {
+                def parchmentMinecraftVersion = mcVersion
+                if (parchmentVersion.contains(":")) {
+                    def parchmentParts = parchmentVersion.split(":", 2)
+                    parchmentMinecraftVersion = parchmentParts[0]
+                    parchmentVersion = parchmentParts[1]
+                }
+                parchment("org.parchmentmc.data:parchment-${parchmentMinecraftVersion}:${parchmentVersion}@zip")
+            }
+        }
+    }
+}

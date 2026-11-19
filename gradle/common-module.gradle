@@ -1,0 +1,44 @@
+apply from: new File(rootProject.ext.repoRoot, "gradle/common-target.gradle")
+
+if (isModern && configurations.findByName("namedElements") == null) {
+    def namedElements = configurations.create("namedElements")
+    namedElements.canBeResolved = false
+    namedElements.canBeConsumed = true
+    tasks.register("namedElementsJar", Jar) {
+        archiveClassifier.set("namedElements")
+        from(sourceSets.main.output)
+    }
+    artifacts.add("namedElements", tasks.named("namedElementsJar"))
+}
+
+def supportedLoaders = (vp.getProperty("supported_loaders", "fabric,forge,neoforge")
+        .split(",") as List).collect { it.trim() }.findAll { it }
+
+architectury {
+    common(*supportedLoaders)
+}
+
+def accessWidener = resourceSourceDirs
+        .collect { new File(it, "efallingtrees.accesswidener") }
+        .find { it.exists() }
+if (!accessWidener) {
+    throw new GradleException("No access widener found for Minecraft ${mcVersion}")
+}
+loom.accessWidenerPath = accessWidener
+
+// Modern non-Fabric loaders need Fabric's annotations at compile time only;
+// bringing Fabric Loader into their runtime also adds a second MixinExtras module.
+def implementationConfiguration = isModern ? "compileOnly" : "modImplementation"
+def apiConfiguration = isModern ? "api" : "modApi"
+def compileOnlyConfiguration = isModern ? "compileOnly" : "modCompileOnly"
+
+dependencies {
+    implementation "org.jetbrains:annotations:24.0.0"
+    add(implementationConfiguration, "net.fabricmc:fabric-loader:${vp.getProperty('fabric_loader_version')}")
+    add(apiConfiguration, "me.shedaniel.cloth:cloth-config-fabric:${vp.getProperty('cloth_config_version')}")
+    add(compileOnlyConfiguration,
+            "maven.modrinth:jade:${vp.getProperty('jade_version')}+fabric-fabric,${vp.getProperty('jade_minecraft_version')}")
+    if (vp.getProperty("architectury_dependency") == "true") {
+        add(apiConfiguration, "dev.architectury:architectury:${vp.getProperty('architectury_version')}")
+    }
+}

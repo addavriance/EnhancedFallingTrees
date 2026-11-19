@@ -1,0 +1,74 @@
+pluginManagement {
+    repositories {
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://maven.minecraftforge.net/" }
+        maven { url "https://maven.neoforged.net/releases" }
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id "org.gradle.toolchains.foojay-resolver-convention" version "1.0.0"
+}
+
+rootProject.name = "enhanced-falling-trees-modern"
+
+def requestedTargets = (providers.gradleProperty("targets").getOrElse("") ?: "")
+        .split(",")
+        .collect { it.trim() }
+        .findAll { it }
+        .toSet()
+
+def versionsRoot = file("../versions")
+def targetAliases = [] as Set
+versionsRoot.eachDir { versionDir ->
+    def versionProps = new Properties()
+    new File(versionDir, "version.properties").withInputStream { versionProps.load(it) }
+    def minecraftVersion = versionProps.getProperty("minecraft_version")
+    ["fabric", "forge", "neoforge"].each { loader ->
+        if (new File(versionDir, "${loader}/build.gradle").exists()) {
+            targetAliases.add(versionDir.name + "-" + loader)
+            targetAliases.add(minecraftVersion + "-" + loader)
+        }
+    }
+}
+
+def unknownTargets = requestedTargets - targetAliases
+if (!unknownTargets.isEmpty()) {
+    throw new GradleException("Unknown target(s): " + unknownTargets.sort().join(", ")
+            + ". Available targets: " + targetAliases.sort().join(", "))
+}
+
+versionsRoot.eachDir { versionDir ->
+    def versionProps = new Properties()
+    new File(versionDir, "version.properties").withInputStream { versionProps.load(it) }
+
+    if (versionProps.getProperty("build_family") != "modern") {
+        return
+    }
+
+    def minecraftVersion = versionProps.getProperty("minecraft_version")
+    def loaders = ["fabric", "forge", "neoforge"].findAll { loader ->
+        def folderTargetName = versionDir.name + "-" + loader
+        def minecraftTargetName = minecraftVersion + "-" + loader
+        new File(versionDir, loader + "/build.gradle").exists()
+                && (requestedTargets.isEmpty()
+                || requestedTargets.contains(folderTargetName)
+                || requestedTargets.contains(minecraftTargetName))
+    }
+
+    if (loaders.isEmpty()) {
+        return
+    }
+
+    def commonName = "common-" + versionDir.name
+    include(commonName)
+    project(":" + commonName).projectDir = new File(versionDir, "common")
+
+    loaders.each { loader ->
+        def targetName = minecraftVersion + "-" + loader
+        include(targetName)
+        project(":" + targetName).projectDir = new File(versionDir, loader)
+    }
+}

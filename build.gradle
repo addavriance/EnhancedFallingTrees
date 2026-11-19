@@ -1,38 +1,70 @@
 plugins {
-    id "architectury-plugin" version "3.5-SNAPSHOT"
-    id "dev.architectury.loom-no-remap" version "1.17-SNAPSHOT" apply false
+    id "architectury-plugin" version "3.5-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.17-SNAPSHOT" apply false
+    id "com.gradleup.shadow" version "9.2.2" apply false
 }
 
-architectury {
-    minecraft = rootProject.minecraft_version
-}
-
-subprojects {
-    apply plugin: "dev.architectury.loom-no-remap"
-
-    dependencies {
-        // No parchment mappings yet for 26.x - loom-no-remap uses official Mojang names directly anyway.
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-    }
-}
+ext.repoRoot = projectDir
+ext.loomPluginId = "dev.architectury.loom"
 
 allprojects {
     apply plugin: "java"
-    apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
+    group = rootProject.maven_group
     base {
         archivesName = rootProject.archives_base_name
     }
-    version = project.name == rootProject.name ?
-            "${rootProject.mod_version}-${rootProject.minecraft_version}" :
-            "${rootProject.mod_version}-${rootProject.minecraft_version}+${project.name}"
-    group = rootProject.maven_group
 
     repositories {
         maven {
-            name = 'ParchmentMC'
-            url = 'https://maven.parchmentmc.org'
+            name = "Fabric"
+            url = uri("https://maven.fabricmc.net/")
+            content {
+                includeGroupByRegex("net\\.fabricmc(\\..*)?")
+                includeGroupByRegex("remapped\\.net\\.fabricmc(\\..*)?")
+            }
+        }
+        maven {
+            name = "MinecraftForge"
+            url = uri("https://maven.minecraftforge.net/")
+            content {
+                includeGroupByRegex("net\\.forge(\\..*)?")
+                includeGroupByRegex("remapped\\.net\\.forge(\\..*)?")
+                includeGroupByRegex("cpw\\.mods(\\..*)?")
+                includeGroupByRegex("remapped\\.cpw\\.mods(\\..*)?")
+                includeGroupByRegex("de\\.oceanlabs\\.mcp(\\..*)?")
+                includeGroupByRegex("remapped\\.de\\.oceanlabs\\.mcp(\\..*)?")
+                includeGroupByRegex("org\\.spongepowered(\\..*)?")
+                includeGroupByRegex("remapped\\.org\\.spongepowered(\\..*)?")
+            }
+        }
+        maven {
+            name = "NeoForge"
+            url = uri("https://maven.neoforged.net/releases")
+            content {
+                includeGroupByRegex("net\\.neoforged(\\..*)?")
+                includeGroupByRegex("remapped\\.net\\.neoforged(\\..*)?")
+                includeGroupByRegex("cpw\\.mods(\\..*)?")
+                includeGroupByRegex("remapped\\.cpw\\.mods(\\..*)?")
+            }
+        }
+        maven {
+            name = "Architectury"
+            url = uri("https://maven.architectury.dev/")
+            content {
+                includeGroupByRegex("dev\\.architectury(\\..*)?")
+                includeGroupByRegex("remapped\\.dev\\.architectury(\\..*)?")
+            }
+        }
+        mavenCentral()
+        maven {
+            name = "ParchmentMC"
+            url = uri("https://maven.parchmentmc.org")
+            content {
+                includeGroup("org.parchmentmc.data")
+                includeGroup("remapped.org.parchmentmc.data")
+            }
         }
 
         exclusiveContent {
@@ -47,19 +79,63 @@ allprojects {
             }
         }
 
-        maven { url = uri("https://maven.shedaniel.me/") }
-        maven { url = uri("https://maven.neoforged.net/releases") }
-        maven { url = uri("https://maven.quiltmc.org/repository/release") }
+        maven {
+            name = "Shedaniel"
+            url = uri("https://maven.shedaniel.me/")
+            content {
+                includeGroupByRegex("me\\.shedaniel(\\..*)?")
+                includeGroupByRegex("remapped\\.me\\.shedaniel(\\..*)?")
+            }
+        }
+        maven {
+            name = "Quilt"
+            url = uri("https://maven.quiltmc.org/repository/release")
+            content {
+                includeGroupByRegex("org\\.quiltmc(\\..*)?")
+                includeGroupByRegex("remapped\\.org\\.quiltmc(\\..*)?")
+            }
+        }
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = 25
-    }
-
-    java {
-        withSourcesJar()
     }
 }
 
-apply from: 'gradle/telegram.gradle'
+def targetProjects = subprojects.findAll {
+    it.name.endsWith("-fabric") || it.name.endsWith("-forge") || it.name.endsWith("-neoforge")
+}
+
+tasks.named("assemble") {
+    dependsOn targetProjects.collect { it.path + ":assemble" }
+    dependsOn gradle.includedBuild("modern").task(":assemble")
+}
+
+tasks.named("check") {
+    dependsOn targetProjects.collect { it.path + ":check" }
+    dependsOn gradle.includedBuild("modern").task(":check")
+}
+
+tasks.named("build") {
+    dependsOn targetProjects.collect { it.path + ":build" }
+    dependsOn gradle.includedBuild("modern").task(":build")
+}
+
+tasks.named("clean") {
+    dependsOn subprojects.collect { it.path + ":clean" }
+    dependsOn gradle.includedBuild("modern").task(":clean")
+}
+
+tasks.register("dist") {
+    group = "build"
+    description = "Builds release jars for every selected Minecraft/loader target."
+    dependsOn targetProjects.collect { it.path + ":collectJar" }
+    dependsOn gradle.includedBuild("modern").task(":dist")
+}
+
+tasks.register("cleanDist", Delete) {
+    delete(file("dist"))
+    dependsOn gradle.includedBuild("modern").task(":cleanDist")
+}
+
+apply from: file("gradle/telegram.gradle")

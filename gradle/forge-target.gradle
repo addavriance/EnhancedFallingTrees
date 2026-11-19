@@ -1,0 +1,138 @@
+apply from: new File(rootProject.ext.repoRoot, "gradle/common-target.gradle")
+apply plugin: "com.gradleup.shadow"
+
+def vp = project.ext.vp
+def mcVersion = project.ext.mcVersion
+def isModern = project.ext.isModern
+def repoRoot = rootProject.ext.repoRoot
+def commonPath = ":common-${projectDir.parentFile.name}"
+evaluationDependsOn(commonPath)
+def apiConfiguration = isModern ? "api" : "modApi"
+def compileOnlyConfiguration = "compileOnly"
+
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+loom {
+    accessWidenerPath = project.ext.commonAccessWidener
+
+    forge {
+        if (!isModern) {
+            convertAccessWideners = true
+            extraAccessWideners.add(loom.accessWidenerPath.get().asFile.name)
+        }
+        mixinConfig "efallingtrees-common.mixins.json"
+        mixinConfig "efallingtrees.mixins.json"
+    }
+}
+
+configurations {
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    if (!isModern) {
+        runtimeClasspath.extendsFrom common
+        developmentForge.extendsFrom common
+    }
+}
+
+if (isModern) {
+    configurations.runtimeClasspath.exclude group: "io.github.llamalad7", module: "mixinextras-fabric"
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${mcVersion}-${vp.getProperty('forge_version')}"
+    add(compileOnlyConfiguration, "net.fabricmc:fabric-loader:${vp.getProperty('fabric_loader_version')}")
+    if (vp.getProperty("architectury_dependency") == "true") {
+        add(apiConfiguration, "dev.architectury:architectury-forge:${vp.getProperty('architectury_version')}")
+    }
+
+    def clothConfigMode = vp.getProperty("forge_cloth_config_mode", "shedaniel")
+    if (clothConfigMode == "jar") {
+        add(apiConfiguration, files(file("libs/${vp.getProperty('forge_cloth_config_jar')}")))
+    } else if (clothConfigMode == "modrinth") {
+        add(apiConfiguration, "maven.modrinth:cloth-config-forge:${vp.getProperty('cloth_config_version')}")
+    } else {
+        add(apiConfiguration, "me.shedaniel.cloth:cloth-config-forge:${vp.getProperty('cloth_config_version')}")
+    }
+
+    common(project(path: commonPath, configuration: "namedElements")) { transitive = false }
+    if (!isModern) {
+        shadowCommon(project(path: commonPath, configuration: "transformProductionForge")) { transitive = false }
+    }
+}
+
+if (isModern) {
+    def mergeCommonOutput = tasks.register("mergeCommonOutput", Copy) {
+        dependsOn project(commonPath).tasks.named("classes")
+        dependsOn tasks.named("compileJava"), tasks.named("processResources")
+        from(project(commonPath).sourceSets.main.output)
+        into(sourceSets.main.output.classesDirs.singleFile)
+        exclude "architectury.common.json", "efallingtrees.accesswidener"
+    }
+
+    tasks.named("classes") {
+        dependsOn mergeCommonOutput
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    if (isModern) {
+        exclude "architectury.common.json", "efallingtrees.accesswidener"
+    }
+
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version
+    }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+    exclude "architectury.common.json"
+    configurations = isModern ? [] : [project.configurations.shadowCommon]
+    archiveClassifier.set(isModern ? null : "dev-shadow")
+}
+
+jar {
+    archiveClassifier.set("dev")
+}
+
+sourcesJar {
+    def commonSources = project(commonPath).sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+if (!isModern) {
+    remapJar {
+        inputFile.set(shadowJar.archiveFile)
+        dependsOn shadowJar
+        archiveClassifier.set(null)
+    }
+}
+
+def releaseTask = isModern ? "shadowJar" : "remapJar"
+tasks.register("collectJar", Copy) {
+    dependsOn tasks.named(releaseTask)
+    from(tasks.named(releaseTask).flatMap { it.archiveFile })
+    into(new File(repoRoot, "dist"))
+}
+
+publishing {
+    publications {
+        mavenForge(MavenPublication) {
+            artifactId = rootProject.archives_base_name + "-forge"
+            from components.java
+        }
+    }
+}
