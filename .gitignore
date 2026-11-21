@@ -120,3 +120,6 @@ run/
 
 # Version-scoped Forge compatibility dependencies
 !versions/**/forge/libs/*.jar
+
+# Local publishing credentials
+.env

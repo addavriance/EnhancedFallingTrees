@@ -1,0 +1,354 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+def modrinthDependencies = [
+        fabricApi  : 'P7dR8mSH',
+        clothConfig: '9s6osm5g',
+        forgeCloth : 'gqpfleRp',
+        architectury: 'lhGA9TYQ',
+        modMenu    : 'mOgUt4GM',
+]
+
+def curseforgeDependencies = [
+        fabricApi  : 'fabric-api',
+        clothConfig: 'cloth-config',
+        forgeCloth : 'cloth-config-forge',
+        architectury: 'architectury-api',
+        modMenu    : 'modmenu',
+]
+
+def loaderNames = [fabric: 'Fabric', forge: 'Forge', neoforge: 'NeoForge']
+def loaderOrder = loaderNames.keySet().toList()
+
+def readEnv = { String key ->
+    def fromEnv = System.getenv(key)
+    if (fromEnv) return fromEnv
+
+    def envFile = rootProject.file('.env')
+    if (!envFile.exists()) return null
+
+    for (line in envFile.readLines('UTF-8')) {
+        def trimmed = line.trim()
+        if (trimmed.startsWith('#') || !trimmed.contains('=')) continue
+
+        def idx = trimmed.indexOf('=')
+        if (trimmed.substring(0, idx).trim() == key) {
+            def value = trimmed.substring(idx + 1).trim()
+            if (value.length() >= 2 &&
+                    ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))) {
+                value = value.substring(1, value.length() - 1)
+            }
+            return value ?: null
+        }
+    }
+    return null
+}
+
+def changelogFor = { String version ->
+    def changelogFile = rootProject.file('Changelog.md')
+    if (!changelogFile.exists()) throw new GradleException('Changelog.md is missing')
+
+    def lines = changelogFile.readLines('UTF-8')
+    def heading = "# Version ${version} Changelog"
+    def start = lines.findIndexOf { it.trim() == heading }
+    if (start < 0) throw new GradleException("Changelog.md has no '${heading}' section")
+
+    def body = []
+    for (int i = start + 1; i < lines.size(); i++) {
+        if (lines[i] ==~ /^# Version .+ Changelog\s*$/) break
+        body << lines[i]
+    }
+    def result = body.join('\n').trim()
+    if (!result) throw new GradleException("Changelog.md section for ${version} is empty")
+    return result
+}
+
+def curl = { List<String> args ->
+    def process = new ProcessBuilder((['curl', '-sS', '-w', '\n%{http_code}'] + args.collect { it.toString() }) as List<String>)
+            .redirectErrorStream(true)
+            .start()
+    def responseText = process.inputStream.getText('UTF-8')
+    def exitCode = process.waitFor()
+    def split = responseText.lastIndexOf('\n')
+    def status = split >= 0 ? responseText.substring(split + 1).trim() : ''
+    def body = split >= 0 ? responseText.substring(0, split) : responseText
+    if (exitCode != 0) throw new GradleException("curl failed (${exitCode}): ${body}")
+    return [status: status, body: body]
+}
+
+def writeTemp = { String content ->
+    def file = File.createTempFile('efallingtrees-publish', '.json')
+    file.deleteOnExit()
+    file.text = content
+    return file
+}
+
+def compareVersions = { String left, String right ->
+    def a = left.tokenize('.').collect { it.isInteger() ? it.toInteger() : 0 }
+    def b = right.tokenize('.').collect { it.isInteger() ? it.toInteger() : 0 }
+    for (int i = 0; i < Math.max(a.size(), b.size()); i++) {
+        def result = (i < a.size() ? a[i] : 0) <=> (i < b.size() ? b[i] : 0)
+        if (result != 0) return result
+    }
+    return 0
+}
+
+def gameVersionsFor = { String minecraftVersion ->
+    // The 1.20 target is published for the two versions tagged on the existing artifacts.
+    if (minecraftVersion == '1.20') return ['1.20', '1.20.1']
+    return [minecraftVersion]
+}
+
+def readTargets = {
+    def versionsRoot = rootProject.file('versions')
+    def targets = []
+    def seenMinecraftLoaders = [] as Set
+
+    (versionsRoot.listFiles() ?: []).findAll { it.isDirectory() }.sort { a, b -> compareVersions(a.name, b.name) }.each { versionDir ->
+        def propsFile = new File(versionDir, 'version.properties')
+        if (!propsFile.exists()) return
+
+        def props = new Properties()
+        propsFile.withInputStream { props.load(it) }
+        def minecraftVersion = props.getProperty('minecraft_version')?.trim()
+        def modVersion = props.getProperty('mod_version')?.trim()
+        if (!minecraftVersion || !modVersion) {
+            throw new GradleException("${propsFile} must define minecraft_version and mod_version")
+        }
+
+        loaderNames.keySet().each { loader ->
+            if (!new File(versionDir, "${loader}/build.gradle").exists()) return
+
+            def key = "${minecraftVersion}-${loader}".toString()
+            if (!seenMinecraftLoaders.add(key)) {
+                throw new GradleException("Multiple version folders define ${key}; publication filters would be ambiguous")
+            }
+            targets << [
+                    key             : key,
+                    folderKey       : "${versionDir.name}-${loader}".toString(),
+                    versionDir      : versionDir,
+                    props           : props,
+                    minecraftVersion: minecraftVersion,
+                    modVersion      : modVersion,
+                    loader          : loader,
+                    fileName        : "${rootProject.archives_base_name}-${modVersion}-${minecraftVersion}+${loader}.jar".toString(),
+                    gameVersions    : gameVersionsFor(minecraftVersion),
+            ]
+        }
+    }
+
+    def mcSorted = targets.sort { a, b ->
+        compareVersions(a.minecraftVersion, b.minecraftVersion) ?: loaderOrder.indexOf(a.loader) <=> loaderOrder.indexOf(b.loader)
+    }
+    return mcSorted
+}
+
+def modrinthDependenciesFor = { target ->
+    def dependencies = []
+    if (target.loader == 'fabric') {
+        dependencies << [project_id: modrinthDependencies.fabricApi, dependency_type: 'required']
+        dependencies << [project_id: modrinthDependencies.clothConfig, dependency_type: 'required']
+    } else if (target.loader == 'neoforge') {
+        dependencies << [project_id: modrinthDependencies.clothConfig, dependency_type: 'required']
+    } else {
+        def clothConfigMode = target.props.getProperty('forge_cloth_config_mode', 'shedaniel')
+        def clothConfigId = clothConfigMode in ['jar', 'modrinth'] ? modrinthDependencies.forgeCloth : modrinthDependencies.clothConfig
+        dependencies << [project_id: clothConfigId, dependency_type: 'required']
+    }
+
+    if (target.props.getProperty('architectury_dependency') == 'true') {
+        dependencies << [project_id: modrinthDependencies.architectury, dependency_type: 'required']
+    }
+    if (target.loader == 'fabric') {
+        dependencies << [project_id: modrinthDependencies.modMenu, dependency_type: 'optional']
+    }
+    return dependencies
+}
+
+def curseforgeRelationsFor = { target ->
+    def projects = []
+    if (target.loader == 'fabric') {
+        projects << [slug: curseforgeDependencies.fabricApi, type: 'requiredDependency']
+        projects << [slug: curseforgeDependencies.clothConfig, type: 'requiredDependency']
+    } else if (target.loader == 'neoforge') {
+        projects << [slug: curseforgeDependencies.clothConfig, type: 'requiredDependency']
+    } else {
+        def clothConfigMode = target.props.getProperty('forge_cloth_config_mode', 'shedaniel')
+        def clothConfigSlug = clothConfigMode in ['jar', 'modrinth'] ? curseforgeDependencies.forgeCloth : curseforgeDependencies.clothConfig
+        projects << [slug: clothConfigSlug, type: 'requiredDependency']
+    }
+
+    if (target.props.getProperty('architectury_dependency') == 'true') {
+        projects << [slug: curseforgeDependencies.architectury, type: 'requiredDependency']
+    }
+    if (target.loader == 'fabric') {
+        projects << [slug: curseforgeDependencies.modMenu, type: 'optionalDependency']
+    }
+    return projects
+}
+
+tasks.register('publishMods') {
+    description = 'Uploads current release jars from dist/ to Modrinth and CurseForge (-PdryRun, -Ponly=modrinth|curseforge, -Pfilter=1.21.1-neoforge)'
+    group = 'distribution'
+
+    doLast {
+        def dryRunValue = findProperty('dryRun') as String
+        def dryRun = project.hasProperty('dryRun') && (!dryRunValue?.trim() || dryRunValue.toBoolean())
+        def only = findProperty('only') as String
+        if (only != null && !(only in ['modrinth', 'curseforge'])) {
+            throw new GradleException("Unknown -Ponly value '${only}'; use modrinth or curseforge")
+        }
+        def useModrinth = only == null || only == 'modrinth'
+        def useCurseForge = only == null || only == 'curseforge'
+
+        def filters = (findProperty('filter') as String)?.split(',')?.collect { it.trim() }?.findAll { it }
+        def targets = readTargets()
+        def acceptedFilters = targets.collectMany { [it.key, it.folderKey] } as Set
+        def unknownFilters = (filters ?: []) as Set
+        unknownFilters.removeAll(acceptedFilters)
+        if (unknownFilters) {
+            throw new GradleException("Unknown target filter(s): ${unknownFilters.sort().join(', ')}")
+        }
+
+        def selectedTargets = filters ? targets.findAll { filters.contains(it.key) || filters.contains(it.folderKey) } : targets
+        if (selectedTargets.isEmpty()) throw new GradleException('No publication targets were selected')
+
+        def distDir = rootProject.file('dist')
+        def distFiles = distDir.isDirectory() ? (distDir.listFiles() ?: []).findAll { it.isFile() } : []
+        def missing = selectedTargets.findAll { !new File(distDir, it.fileName).isFile() }
+        if (missing) {
+            throw new GradleException('Missing current release jar(s) in dist/:\n  ' + missing.collect { "${it.key}: ${it.fileName}" }.join('\n  '))
+        }
+
+        def expectedNames = targets.collect { it.fileName } as Set
+        def staleJars = distFiles.findAll {
+            it.name.startsWith("${rootProject.archives_base_name}-") && it.name.endsWith('.jar') && !expectedNames.contains(it.name)
+        }
+        if (staleJars) println "Ignoring ${staleJars.size()} stale or non-current jar(s) in dist/"
+
+        def modVersions = selectedTargets.collect { it.modVersion }.unique()
+        def tag = findProperty('tag') as String
+        if (tag && (modVersions.size() != 1 || tag.replaceFirst(/^v/, '') != modVersions[0])) {
+            throw new GradleException("Tag '${tag}' does not match selected mod_version value(s) ${modVersions}")
+        }
+
+        def changelogs = [:]
+        selectedTargets.collect { it.modVersion }.unique().each { version -> changelogs[version] = changelogFor(version) }
+
+        def modrinthProject = readEnv('MODRINTH_PROJECT_ID')
+        def curseforgeProject = readEnv('CURSEFORGE_PROJECT_ID')
+        if (useModrinth && !modrinthProject) throw new GradleException('MODRINTH_PROJECT_ID is not set (.env or environment)')
+        if (useCurseForge && !curseforgeProject) throw new GradleException('CURSEFORGE_PROJECT_ID is not set (.env or environment)')
+
+        def modrinthToken = readEnv('MODRINTH_TOKEN')
+        def curseforgeToken = readEnv('CURSEFORGE_TOKEN')
+        if (!dryRun) {
+            if (useModrinth && !modrinthToken) throw new GradleException('MODRINTH_TOKEN is not set (.env or environment)')
+            if (useCurseForge && !curseforgeToken) throw new GradleException('CURSEFORGE_TOKEN is not set (.env or environment)')
+        }
+
+        def existingModrinthVersions = [] as Set
+        if (useModrinth && !dryRun) {
+            def response = curl(['-H', "Authorization: ${modrinthToken}", '-A', 'addavriance/EnhancedFallingTrees publish',
+                                 "https://api.modrinth.com/v2/project/${modrinthProject}/version"])
+            if (response.status != '200') throw new GradleException("Modrinth version list failed: ${response.status} ${response.body}")
+            new JsonSlurper().parseText(response.body).each { existingModrinthVersions << it.version_number }
+        }
+
+        def curseforgeVersionIds = [:]
+        if (useCurseForge && !dryRun) {
+            def response = curl(['-H', "X-Api-Token: ${curseforgeToken}", 'https://minecraft.curseforge.com/api/game/versions'])
+            if (response.status != '200') throw new GradleException("CurseForge game versions failed: ${response.status} ${response.body}")
+            new JsonSlurper().parseText(response.body).each { version ->
+                if (!(version.gameVersionTypeID in [1, 615])) curseforgeVersionIds[version.name] = version.id
+            }
+        }
+
+        def failures = []
+        selectedTargets.each { target ->
+            def jar = new File(distDir, target.fileName)
+            def versionNumber = "${target.modVersion}-${target.minecraftVersion}+${target.loader}".toString()
+            def displayName = "Enhanced Falling Trees ${versionNumber}".toString()
+            def dependencies = modrinthDependenciesFor(target)
+            def relationProjects = curseforgeRelationsFor(target)
+            def gameVersionNames = target.gameVersions + [loaderNames[target.loader], 'Client', 'Server']
+            // TreeChop is available only for these Minecraft/loader combinations.
+            def targetChangelog = changelogs[target.modVersion]
+            if (target.minecraftVersion != '1.21.1' || !(target.loader in ['fabric', 'neoforge'])) {
+                targetChangelog = targetChangelog.readLines().findAll { !it.contains("HT's TreeChop compatibility") }.join('\n')
+            }
+
+            println "== ${versionNumber}  [${jar.name}]"
+
+            if (useModrinth) {
+                if (existingModrinthVersions.contains(versionNumber)) {
+                    println "   modrinth: ${versionNumber} already exists, skipped"
+                } else if (dryRun) {
+                    println "   modrinth: would upload for ${target.gameVersions} / ${target.loader}"
+                    println "   modrinth dependencies: ${dependencies.collect { "${it.project_id} (${it.dependency_type})" }}"
+                } else {
+                    def data = [
+                            project_id   : modrinthProject,
+                            name         : displayName,
+                            version_number: versionNumber,
+                            changelog    : targetChangelog,
+                            dependencies : dependencies,
+                            game_versions: target.gameVersions,
+                            version_type : 'release',
+                            loaders      : [target.loader],
+                            featured     : false,
+                            file_parts   : ['file'],
+                            primary_file : 'file',
+                    ]
+                    def dataFile = writeTemp(JsonOutput.toJson(data))
+                    def response = curl(['-H', "Authorization: ${modrinthToken}", '-A', 'addavriance/EnhancedFallingTrees publish',
+                                         '-F', "data=<${dataFile.absolutePath};type=application/json",
+                                         '-F', "file=@${jar.absolutePath};type=application/java-archive",
+                                         'https://api.modrinth.com/v2/version'])
+                    if (response.status == '200') {
+                        println '   modrinth: uploaded'
+                    } else {
+                        println "   modrinth: FAILED ${response.status} ${response.body}"
+                        failures << "modrinth ${versionNumber}"
+                    }
+                }
+            }
+
+            if (useCurseForge) {
+                if (dryRun) {
+                    println "   curseforge: would upload for ${gameVersionNames}"
+                    println "   curseforge relations: ${relationProjects}"
+                } else {
+                    def missingGameVersions = gameVersionNames.findAll { !curseforgeVersionIds.containsKey(it) }
+                    if (missingGameVersions) {
+                        println "   curseforge: FAILED unknown game versions ${missingGameVersions}"
+                        failures << "curseforge ${versionNumber}"
+                    } else {
+                        def metadata = [
+                                changelog    : targetChangelog,
+                                changelogType: 'markdown',
+                                displayName  : displayName,
+                                gameVersions : gameVersionNames.collect { curseforgeVersionIds[it] },
+                                releaseType  : 'release',
+                        ]
+                        if (relationProjects) metadata.relations = [projects: relationProjects]
+                        def metadataFile = writeTemp(JsonOutput.toJson(metadata))
+                        def response = curl(['-H', "X-Api-Token: ${curseforgeToken}",
+                                             '-F', "metadata=<${metadataFile.absolutePath};type=application/json",
+                                             '-F', "file=@${jar.absolutePath}",
+                                             "https://minecraft.curseforge.com/api/projects/${curseforgeProject}/upload-file"])
+                        if (response.status == '200') {
+                            println '   curseforge: uploaded'
+                        } else {
+                            println "   curseforge: FAILED ${response.status} ${response.body}"
+                            failures << "curseforge ${versionNumber}"
+                        }
+                    }
+                }
+            }
+        }
+
+        if (failures) throw new GradleException('Failed uploads:\n  ' + failures.join('\n  '))
+        println(dryRun ? 'Dry run finished, nothing was uploaded' : "Published ${selectedTargets.size()} jars")
+    }
+}

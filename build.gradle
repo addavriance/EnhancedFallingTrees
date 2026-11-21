@@ -139,3 +139,4 @@ tasks.register("cleanDist", Delete) {
 }
 
 apply from: file("gradle/telegram.gradle")
+apply from: file("gradle/publish.gradle")
