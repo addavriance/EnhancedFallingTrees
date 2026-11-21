@@ -27,6 +27,9 @@ def moduleName = projectDir.name
 def sourceFamily = versionProperties.getProperty("source_family")
 def sharedSourceRoot = rootProject.ext.repoRoot.toPath().resolve("${moduleName}/src/main").toFile()
 def compatSourceRoot = rootProject.ext.repoRoot.toPath().resolve("compat/mc/${sourceFamily}/${moduleName}/src/main").toFile()
+def sharedCompatSourceRoots = versionProperties.getProperty("source_groups", "").split(",").findAll { it }.collect { group ->
+    rootProject.ext.repoRoot.toPath().resolve("compat/mc/shared/${group}/${moduleName}/src/main/java").toFile()
+}
 
 group = rootProject.maven_group
 version = "${versionProperties.getProperty('mod_version')}-${mcVersion}+${moduleName}"
@@ -40,7 +43,7 @@ architectury {
 
 sourceSets {
     main {
-        java.setSrcDirs([new File(sharedSourceRoot, "java"), new File(compatSourceRoot, "java")].findAll { it.exists() })
+        java.setSrcDirs(([new File(sharedSourceRoot, "java"), new File(compatSourceRoot, "java")] + sharedCompatSourceRoots).findAll { it.exists() })
         resources.setSrcDirs(resourceSourceDirs)
     }
 }
