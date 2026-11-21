@@ -1,3 +1,18 @@
+# Version 0.8.0 Changelog
+## New Features
+- Falling trunks can damage and knock back entities, while leaves push them gently. Configure these effects in the new Physics category.
+- Added an option to fell trees made from mixed logs and leaves.
+- Added HT's TreeChop compatibility: trees chopped through with TreeChop use the falling animation.
+- Added paxels to the default tree-felling tool filter.
+
+## Improvements
+- Falling tree positions now stay in sync between the server and clients, and flowing water gently shakes trees instead of carrying them away.
+
+## Bug Fixes
+- Fixed a Fabric dedicated server startup crash caused by loading client networking classes.
+- Fixed falling trees disappearing when their chunks unload.
+- Fixed common configuration changes requiring a world rejoin in singleplayer.
+
 # Version 0.7.1 Changelog
 ## New Features
 - Added a setting to drop all tree loot on a single block instead of spreading it along the trunk.
